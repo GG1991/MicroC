@@ -20,24 +20,24 @@
 
 #include "microc.h"
 
-void get_elem_rhs_with_ie(const int ie, const double *u,
-		  const double *varsold, double be[npe * dim])
+void get_elem_rhs_with_ie(const int ie, const double *u, const double *varsold, double be[NPE * DIM])
 {
 	double stress[NVOI], strain[NVOI];
 	double B[NVOI][NPE * DIM];
+	double u_e[NPE * DIM];
 
 	memset(be, 0, NPE * DIM * sizeof(double));
 
 	int gp;
-	for (gp = 0; gp < npe; ++gp) {
+	for (gp = 0; gp < NPE; ++gp) {
 
 		calc_B(gp, B);
 
 		calc_strain(u_e, B, strain);
 		get_stress(ie, strain, varsold, stress);
 
-		for (int i = 0; i < npedim; ++i)
-			for (int j = 0; j < nvoi; ++j)
+		for (int i = 0; i < NPE * DIM; ++i)
+			for (int j = 0; j < NVOI; ++j)
 				be[i] += B[j][i] * stress[j] * wg;
 	}
 }

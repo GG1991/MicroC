@@ -29,9 +29,9 @@ void material_set(material_t *mat, double _E, double _nu, double _Ka, double _Sy
 	mat->Sy = _Sy;
 	mat->type = _type;
 
-	mat->k = E / (3. * (1. - 2. * nu));
-	mat->mu = E / (2. * (1. + nu));
-	mat->lambda = nu * E / ((1. + nu) * (1. - 2. * nu));
+	mat->k = _E / (3. * (1. - 2. * _nu));
+	mat->mu = _E / (2. * (1. + _nu));
+	mat->lambda = _nu * _E / ((1. + _nu) * (1. - 2. * _nu));
 
 	if (_type == 0) {
 		// lineal
@@ -57,7 +57,7 @@ void material_print(material_t *mat)
 
 void get_dev_tensor(const double tensor[6], double tensor_dev[6])
 {
-	memcpy(tensor_dev, tensor, nvoi * sizeof(double));
+	memcpy(tensor_dev, tensor, 6 * sizeof(double));
 
 	int i;
 	for (i = 0; i < 3; i++)
@@ -120,8 +120,7 @@ void plastic_get_stress(const material_t *mat, const double eps[6], const double
 {
 	int i;
 	double dl, normal[6], s_trial[6];
-	bool nl_flag = plastic_law(mat, eps, eps_p_old, alpha_old,
-				   &dl, normal, s_trial, NULL);
+	bool nl_flag = plastic_law(mat, eps, eps_p_old, alpha_old, &dl, normal, s_trial, NULL);
 
 	//sig_2 = s_trial + K * tr(eps) * 1 - 2 * mu * dl * normal;
 	memcpy(stress, s_trial, 6 * sizeof(double));
@@ -137,21 +136,20 @@ void plastic_get_stress(const material_t *mat, const double eps[6], const double
 void plastic_get_ctan(const material_t *mat, const double eps[6], const double eps_p_old[6],
 		      const double alpha_old, double ctan[6][6])
 {
-	int i;
+	int i, j;
 	double stress_0[6];
 	plastic_get_stress(mat, eps, eps_p_old, alpha_old, stress_0);
 
-	for (i = 0; i < nvoi; ++i) {
+	for (i = 0; i < 6; ++i) {
 
 		double eps_1[6];
-		memcpy(eps_1, eps, nvoi * sizeof(double));
+		memcpy(eps_1, eps, 6 * sizeof(double));
 		eps_1[i] += D_EPS_CTAN;
 
 		double stress_1[6];
-		plastic_get_stress(mat, eps_1, eps_p_old,
-				   alpha_old, stress_1);
+		plastic_get_stress(mat, eps_1, eps_p_old, alpha_old, stress_1);
 
-		for (j = 0; j < nvoi; ++j)
+		for (j = 0; j < 6; ++j)
 			ctan[j][i] = (stress_1[j] - stress_0[j]) / D_EPS_CTAN;
 	}
 }
@@ -161,9 +159,9 @@ bool plastic_evolute(const material_t *mat, const double eps[6], const double ep
 		     double *eps_p_new, double *alpha_new, double *f_trial)
 {
 	double dl, normal[6], s_trial[6];
-	bool nl_flag = plastic_law(mat, eps, eps_p_old, alpha_old,
-				   &dl, normal, s_trial, f_trial);
+	bool nl_flag = plastic_law(mat, eps, eps_p_old, alpha_old, &dl, normal, s_trial, f_trial);
 
+	int i;
 	for (i = 0; i < 6; ++i)
 		eps_p_new[i] = eps_p_old[i] + dl * normal[i];
 
@@ -175,7 +173,7 @@ bool plastic_evolute(const material_t *mat, const double eps[6], const double ep
 void isolin_get_ctan(const material_t *material, double ctan[6][6])
 {
 	// C = lambda * (1x1) + 2 mu I
-	memset(ctan, 0, nvoi * nvoi * sizeof(double));
+	memset(ctan, 0, 6 * 6 * sizeof(double));
 
 	int i;
 	for (i = 0; i < 3; ++i)

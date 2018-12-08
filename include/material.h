@@ -21,7 +21,14 @@
 #ifndef MATERIAL_HPP
 #define MATERIAL_HPP
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
 #include <stdbool.h>
+
+#define SQRT_2DIV3     0.816496581
+#define D_EPS_CTAN     1.0e-8
 
 typedef struct {
 
@@ -49,6 +56,6 @@ bool plastic_evolute(const material_t *mat, const double eps[6], const double ep
 void isolin_get_ctan(const material_t *material, double ctan[6][6]);
 void isolin_get_stress(const material_t *material, const double eps[6], double stress[6]);
 
-void material_print(void);
+void material_print(material_t *mat);
 
 #endif

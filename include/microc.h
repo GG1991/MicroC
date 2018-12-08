@@ -55,7 +55,6 @@ enum {
 };
 
 #define CONSTXG        0.577350269189626
-#define SQRT_2DIV3     0.816496581
 
 static double xg[8][3] = {
 	{ -CONSTXG, -CONSTXG, -CONSTXG },
@@ -113,5 +112,8 @@ void calc_strain(const double u_e[NPE * DIM], const double B[NVOI][NPE * DIM], d
 void calc_B(int gp, double B[6][NPE * DIM]);
 int get_elem_type(const int ex, const int ey, const int ez);
 material_t *get_material(const int ie);
+
+// assembly.c
+void get_elem_rhs_with_ie(const int ie, const double *u, const double *varsold, double be[NPE * DIM]);
 
 #endif
