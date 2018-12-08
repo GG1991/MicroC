@@ -85,7 +85,7 @@ int *elem_type;
 int micro_type;
 double special_param;
 
-const PetscInt *eix;
+const int *eix;
 
 gp_t *gp_list;
 material_t material_list[2];
@@ -109,9 +109,11 @@ void microc_homogenize();
 
 //general.c
 void calc_strain(const double u_e[NPE * DIM], const double B[NVOI][NPE * DIM], double strain[6]);
+void calc_stress(const int ie, const double strain[NVOI], const double *vars_old, double stress[NVOI]);
 void calc_B(int gp, double B[6][NPE * DIM]);
 int get_elem_type(const int ex, const int ey, const int ez);
 material_t *get_material(const int ie);
+void calc_elemental_displacements_with_ie(const int ie, const double *u_global, double u_e[NPE * DIM]);
 
 // assembly.c
 void get_elem_rhs_with_ie(const int ie, const double *u, const double *varsold, double be[NPE * DIM]);

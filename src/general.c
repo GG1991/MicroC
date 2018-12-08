@@ -21,9 +21,6 @@
 #include "microc.h"
 
 
-//void calc_stress(int nmat, const double strain[NPE * DIM])
-//{
-
 int get_elem_type(const int ex, const int ey, const int ez)
 {
 	int i;
