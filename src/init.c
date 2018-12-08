@@ -22,42 +22,37 @@
 #include "microc.h"
 
 
-PetscErrorCode microc_init()
+int microc_init(const int _ngp, const int _size[3], const int _type,
+		const double *_params)
 {
 
-	PetscErrorCode ierr;
+	int ierr;
 	ierr = PetscInitialize(NULL, NULL, (char*)0, help);
 
        	if(ierr)
 	       	return ierr;
 
-	PetscPrintf(PETSC_COMM_WORLD,
-		    "\nMicroC : A HPC for FE2 Multi-scale Simulations\n\n");
+	printf("\nMicroC : A HPC for FE2 Multi-scale Simulations\n\n");
 
 	lx = LX;
 	ly = LY;
 	lz = LZ;
 
-	vtu_freq = VTU_FREQ;
+	nx = _size[0];
+	ny = _size[1];
+	nz = _size[2];
+
 	newton_max_its = NEWTON_MAX_ITS;
 	newton_min_tol = NEWTON_MIN_TOL;
-
-	PetscOptionsGetReal(NULL, NULL, "-lx", &lx, NULL);
-	PetscOptionsGetReal(NULL, NULL, "-ly", &ly, NULL);
-	PetscOptionsGetReal(NULL, NULL, "-lz", &lz, NULL);
-	PetscOptionsGetReal(NULL, NULL, "-new_tol", &newton_min_tol, NULL);
-	PetscOptionsGetInt(NULL, NULL, "-vtu_freq", &vtu_freq, NULL);
-	PetscOptionsGetInt(NULL, NULL, "-new_its", &newton_max_its, NULL);
 
 	DMBoundaryType bx = DM_BOUNDARY_NONE, by = DM_BOUNDARY_NONE,
 		       bz = DM_BOUNDARY_NONE;
 	ierr = DMDACreate3d(PETSC_COMM_WORLD, bx, by, bz, DMDA_STENCIL_BOX,
-			    NX, NY, NZ,
+			    nx, ny, nz,
 			    PETSC_DECIDE, PETSC_DECIDE, PETSC_DECIDE,
 			    DIM, 1, NULL, NULL, NULL, &da);
 
 	ierr = DMSetMatType(da, MATAIJ); CHKERRQ(ierr);
-	ierr = DMSetFromOptions(da); CHKERRQ(ierr);
 	ierr = DMSetUp(da); CHKERRQ(ierr);
 	ierr = DMCreateMatrix(da, &A); CHKERRQ(ierr);
 	ierr = DMCreateGlobalVector(da, &u); CHKERRQ(ierr);
@@ -75,12 +70,12 @@ PetscErrorCode microc_init()
 	ierr = DMDAGetInfo(da, 0, &M, &N, &P, 0, 0, 0, 0,
 			   0, 0, 0, 0, 0); CHKERRQ(ierr);
 
-	PetscPrintf(PETSC_COMM_WORLD,
-		    "Number of Elements : %ld\n", (M - 1) * (N - 1) * (P - 1));
-	PetscPrintf(PETSC_COMM_WORLD,
-		    "Number of Nodes    : %ld\n", M * N * P);
-	PetscPrintf(PETSC_COMM_WORLD,
-		    "Number of DOFs     : %ld\n\n", (M * N * P) * DIM);
+	nn = M * N * P;
+	nndim = nn * DIM;
+
+	printf("Number of Elements : %ld\n", (M - 1) * (N - 1) * (P - 1));
+	printf("Number of Nodes    : %ld\n", M * N * P);
+	printf("Number of DOFs     : %ld\n\n", (M * N * P) * DIM);
 
 	dx = lx / (M - 1);
 	dy = ly / (N - 1);
@@ -101,27 +96,36 @@ PetscErrorCode microc_init()
 
 	ierr = KSPGetTolerances(ksp, &rtol, &abstol, &dtol, &maxits);
 	ierr = KSPGetType(ksp, &ksptype);
-	PetscPrintf(PETSC_COMM_WORLD,
-		    "KSP Info: type = %s\trtol = %e\t\
-		    abstol = %e\tdtol = %e\tmaxits = %d\n",
-		    ksptype, rtol, abstol, dtol, maxits);
+	printf("KSP Info: type = %s\trtol = %e\t"
+	       "abstol = %e\tdtol = %e\tmaxits = %d\n",
+	       ksptype, rtol, abstol, dtol, maxits);
 
-	PetscInt nex, ney, nez;
 	ierr = DMDAGetElementsSizes(da, &nex, &ney, &nez); CHKERRQ(ierr);
+
+	// Init <struct gp_t> list
+	ngp = _ngp;
+        gp_list = malloc(ngp * sizeof(gp_t));
+
+	int gp;
+	for (gp = 0; gp < ngp; ++gp) {
+		gp_list[gp].u_n = (double *) calloc(nndim, sizeof(double));
+		gp_list[gp].u_k = (double *) calloc(nndim, sizeof(double));
+	}
+
 
 	return ierr;
 }
 
 
-PetscErrorCode finish()
+int microc_finish(void)
 {
-	PetscErrorCode ierr;
+	int ierr;
 	ierr = MatDestroy(&A); CHKERRQ(ierr);
 	ierr = VecDestroy(&u); CHKERRQ(ierr);
 	ierr = VecDestroy(&b); CHKERRQ(ierr);
 	ierr = VecDestroy(&du); CHKERRQ(ierr);
 	ierr = KSPDestroy(&ksp); CHKERRQ(ierr);
 
-	ierr = PetscFinalize();
+	ierr = PetscFinalize(); CHKERRQ(ierr);
 	return ierr;
 }

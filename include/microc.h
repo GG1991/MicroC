@@ -22,10 +22,14 @@
 #define MICROC_H
 
 #include <stdio.h>
+#include <stdbool.h>
+#include <math.h>
+#include <assert.h>
 
 #include "petscksp.h"
 #include "petscdm.h"
 #include "petscdmda.h"
+#include "gp.h"
 
 #define NGP            8
 #define NPE            8
@@ -34,20 +38,9 @@
 #define NEWTON_MIN_TOL 1.0e-1
 #define NEWTON_MAX_ITS 2
 
-#define FINAL_TIME     10.0
-#define TIME_STEPS     1
-#define VTU_FREQ       -1
-#define DT             0.001
-#define NX             5
-#define NY             5
-#define NZ             5
-#define LX             10.0
+#define LX             1.0
 #define LY             1.0
 #define LZ             1.0
-
-#define U_MAX          -0.8
-
-static char help[] = "FE code to solve macroscopic problems with PETSc.\n";
 
 #define CONSTXG        0.577350269189626
 
@@ -61,14 +54,20 @@ static double xg[8][3] = {
 	{ +CONSTXG, +CONSTXG, +CONSTXG },
 	{ -CONSTXG, +CONSTXG, +CONSTXG } };
 
+static char help[] = "FE code to solve macroscopic problems with PETSc.\n";
+
 double lx, ly, lz, dx, dy, dz;
 double wg;
 
-PetscReal dt, final_time;
-PetscReal newton_min_tol;
-PetscInt ts;
-PetscInt vtu_freq;
-PetscInt newton_max_its;
+double newton_min_tol;
+int newton_max_its;
+int nx, ny, nz, nn;
+int nndim;
+int nex, ney, nez;
+int ngp;
+int nvars;
+
+gp_t *gp_list;
 
 DM da;
 PC pc;
@@ -76,7 +75,14 @@ KSP ksp;
 Mat A;
 Vec u, du, b;
 
-PetscErrorCode microc_init();
-PetscErrorCode microc_finish();
+int microc_init(const int ngp, const int size[3], const int micro_type,
+		const double *micro_params);
+int microc_finish(void);
+
+// homogenize.c
+void microc_set_macro_strain(const int gp_id, const double *macro_strain);
+void microc_get_macro_stress(const int gp_id, double *macro_stress);
+void microc_get_macro_ctan(const int gp_id, double *macro_ctan);
+void microc_homogenize();
 
 #endif

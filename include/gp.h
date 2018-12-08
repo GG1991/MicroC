@@ -18,26 +18,31 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef GP_H
+#define GP_H
 
-#include "microc.h"
+#include "stdbool.h"
 
-int main(void)
-{
-	int size1[3] = { 10, 10, 10 };
-	int ngp1 = 1;
-	int type1 = 2;
-	double params1[1] = { 0.2 };
+#define GP_NR_MAX_ITS 10
 
-	microc_init(ngp1, size1, type1, params1);
-	microc_finish();
+typedef struct {
 
-//	int size2[3] = { 50, 50, 50 };
-//	int ngp2 = 10;
-//	int type2 = 5;
-//	double params2[1] = { 0.3 };
+	double macro_strain[6];
+	double macro_stress[6];
+	double *macro_ctan;
 
-//	microc_init(ngp2, size2, type2, params2);
-//	microc_finish();
+	bool allocated; // flag for memory optimization
 
-	return 0;
-}
+	double *int_vars_n; // vectors for calculations
+	double *int_vars_k;
+	double *u_n;
+	double *u_k;
+
+	int sigma_solver_its[GP_NR_MAX_ITS];
+	int sigma_newton_its;
+	double sigma_solver_err[GP_NR_MAX_ITS];
+	double sigma_newton_err[GP_NR_MAX_ITS];
+	long int sigma_cost;
+} gp_t;
+
+#endif
