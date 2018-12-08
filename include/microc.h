@@ -38,6 +38,7 @@
 #define NVOI           6
 #define DIM            3
 #define NEWTON_MIN_TOL 1.0e-1
+#define NEWTON_REL_TOL 1.0e-3
 #define NEWTON_MAX_ITS 2
 
 #define LX             1.0
@@ -93,7 +94,7 @@ material_t material_list[2];
 DM da;
 PC pc;
 KSP ksp;
-Mat A;
+Mat A, A0;
 Vec u, du, b;
 
 // init.c
@@ -119,7 +120,7 @@ void calc_elemental_displacements_with_ie(const int ie, const double *u_global, 
 // assembly.c
 void get_elem_rhs_with_ie(const int ie, const double *u, const double *varsold, double be[NPE * DIM]);
 void get_elem_mat_with_ie(const int ie, const double *u_global, const double *varsold, double be[NPE * DIM]);
-double assembly_res(Vec u, Vec b, double *vars_old);
-int assembly_jac(Vec u, Mat A, double *vars_old);
+double assembly_res(Vec b, Vec u, double *vars_old);
+int assembly_jac(Mat A, Vec u, double *vars_old);
 
 #endif

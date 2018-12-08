@@ -85,7 +85,7 @@ void get_elem_mat_with_ie(const int ie, const double *u_global, const double *va
 }
 
 
-double assembly_res(Vec u, Vec b, double *vars_old)
+double assembly_res(Vec b, Vec u, double *vars_old)
 {
 	int ierr;
 	int ie, n, d;
@@ -131,7 +131,7 @@ double assembly_res(Vec u, Vec b, double *vars_old)
 }
 
 
-int assembly_jac(Vec u, Mat A, double *vars_old)
+int assembly_jac(Mat A, Vec u, double *vars_old)
 {
 	int ierr;
 	int ie, n, d;
