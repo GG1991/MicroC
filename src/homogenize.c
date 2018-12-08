@@ -32,6 +32,14 @@ void microc_set_macro_strain(const int gp_id, const double *macro_strain)
 }
 
 
+void microc_get_macro_strain(const int gp_id, double *macro_strain)
+{
+	assert(gp_id >= 0);
+	assert(gp_id < ngp);
+	memcpy(macro_strain, gp_list[gp_id].macro_strain, NVOI * sizeof(double));
+}
+
+
 void microc_get_macro_stress(const int gp_id, double *macro_stress)
 {
 	assert(gp_id >= 0);

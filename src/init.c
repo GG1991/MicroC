@@ -59,6 +59,11 @@ int microc_init(const int _ngp, const int _size[3], const int _type,
 	ierr = DMCreateGlobalVector(da, &b); CHKERRQ(ierr);
 	ierr = DMCreateGlobalVector(da, &du); CHKERRQ(ierr);
 
+
+	int npe;
+	ierr = DMDAGetElements(da, &nelem, &npe, &eix); CHKERRQ(ierr);
+	assert(npe == NPE);
+
 	ierr = VecSetOption(u, VEC_IGNORE_NEGATIVE_INDICES, PETSC_TRUE);
 	ierr = VecSetOption(b, VEC_IGNORE_NEGATIVE_INDICES, PETSC_TRUE);
 
@@ -67,13 +72,12 @@ int microc_init(const int _ngp, const int _size[3], const int _type,
 	ierr = VecZeroEntries(du); CHKERRQ(ierr);
 
 	PetscInt M, N, P;
-	ierr = DMDAGetInfo(da, 0, &M, &N, &P, 0, 0, 0, 0,
-			   0, 0, 0, 0, 0); CHKERRQ(ierr);
+	ierr = DMDAGetInfo(da, 0, &M, &N, &P, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 	nn = M * N * P;
 	nndim = nn * DIM;
 
-	printf("Number of Elements : %ld\n", (M - 1) * (N - 1) * (P - 1));
+	printf("Number of Elements : %ld\n", nelem);
 	printf("Number of Nodes    : %ld\n", M * N * P);
 	printf("Number of DOFs     : %ld\n\n", (M * N * P) * DIM);
 
@@ -96,8 +100,7 @@ int microc_init(const int _ngp, const int _size[3], const int _type,
 
 	ierr = KSPGetTolerances(ksp, &rtol, &abstol, &dtol, &maxits);
 	ierr = KSPGetType(ksp, &ksptype);
-	printf("KSP Info: type = %s\trtol = %e\t"
-	       "abstol = %e\tdtol = %e\tmaxits = %d\n",
+	printf("KSP Info: type = %s\trtol = %e\tabstol = %e\tdtol = %e\tmaxits = %d\n",
 	       ksptype, rtol, abstol, dtol, maxits);
 
 	ierr = DMDAGetElementsSizes(da, &nex, &ney, &nez); CHKERRQ(ierr);

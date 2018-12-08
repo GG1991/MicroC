@@ -4,6 +4,7 @@ set(CMAKE_BUILD_TYPE Debug)
 # The test files I care only (create a list)
 set(testsources
 	test_init.c
+	test_set_strain.c
 	)
 
 # Iterate over the list above
@@ -20,4 +21,5 @@ endforeach ()
 # tests individually here.
 
 # Add a test that requires arguments
-#add_test(NAME test2d_1 COMMAND test2d_1 5 5 10)
+add_test(NAME test_init COMMAND test_init)
+add_test(NAME test_set_strain COMMAND test_set_strain)

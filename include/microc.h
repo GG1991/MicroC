@@ -61,11 +61,15 @@ double wg;
 
 double newton_min_tol;
 int newton_max_its;
+
 int nx, ny, nz, nn;
 int nndim;
+int nelem;
 int nex, ney, nez;
 int ngp;
 int nvars;
+
+const PetscInt *eix;
 
 gp_t *gp_list;
 
@@ -81,8 +85,13 @@ int microc_finish(void);
 
 // homogenize.c
 void microc_set_macro_strain(const int gp_id, const double *macro_strain);
+void microc_get_macro_strain(const int gp_id, double *macro_strain);
 void microc_get_macro_stress(const int gp_id, double *macro_stress);
 void microc_get_macro_ctan(const int gp_id, double *macro_ctan);
 void microc_homogenize();
+
+//general.c
+void get_strain_of_ie_gp(const double *u, const int ie, const int gp, double *strain_gp);
+void calc_B(int gp, double B[6][NPE * DIM]);
 
 #endif
