@@ -45,17 +45,52 @@ void get_elem_rhs_with_ie(const int ie, const double *u_global, const double *va
 }
 
 
+void get_elem_mat_with_ie(const int ie, const double *u_global, const double *vars_old, double Ae[NPE * DIM * NPE * DIM])
+{
+	int i, j, k, m;
+	double strain[NVOI], ctan[NVOI][NVOI];
+	double B[NVOI][NPE * DIM];
+	double cxb[NVOI][NPE * DIM];
+	double u_e[NPE * DIM];
+
+	memset(Ae, 0, NPE * DIM * NPE * DIM * sizeof(double));
+
+	calc_elemental_displacements_with_ie(ie, u_global, u_e);
+
+	int gp;
+	for (gp = 0; gp < NPE; ++gp) {
+
+		calc_B(gp, B);
+
+		calc_strain(u_e, B, strain);
+		calc_ctan(ie, strain, vars_old, ctan);
+
+		for (i = 0; i < NVOI; ++i) {
+			for (j = 0; j < NPE * DIM; ++j) {
+				double tmp = 0.0;
+				for (k = 0; k < NVOI; ++k)
+					tmp += ctan[i][k] * B[k][j];
+				cxb[i][j] = tmp;
+			}
+		}
+
+		for (i = 0; i < NPE * DIM; ++i) {
+			for (m = 0; m < NVOI; ++m) {
+				for (j = 0; j < NPE * DIM; ++j) {
+					Ae[i * (NPE * DIM) + j] += B[m][i] * cxb[m][j] * wg;
+				}
+			}
+		}
+	}
+}
+
+
 double assembly_res(Vec u, Vec b, double *vars_old)
 {
 	int ierr;
-	int i, j, k;
-	int n, d, gp;
+	int ie, n, d;
 	int ix[NPE * DIM];
-	double u_e[NPE * DIM];
-	double stress[NVOI];
 	double be[NPE * DIM * NPE * DIM];
-	double B[NVOI][NPE * DIM];
-	int ie;
 	double *u_arr, *b_arr;
 
 	Vec u_loc;
@@ -93,4 +128,38 @@ double assembly_res(Vec u, Vec b, double *vars_old)
 	VecNorm(b, NORM_2, &norm);
 
 	return norm;
+}
+
+
+int assembly_jac(Vec u, Mat A, double *vars_old)
+{
+	int ierr;
+	int ie, n, d;
+	int ix[NPE * DIM];
+	double Ae[NPE * DIM * NPE * DIM];
+	double *u_arr;
+
+	ierr = VecGetArray(u, &u_arr);CHKERRQ(ierr);
+	ierr = MatZeroEntries(A); CHKERRQ(ierr);
+
+	for(ie = 0; ie < nelem; ++ie) {
+
+		// Calculates the elemental matrix <Ae>
+		get_elem_mat_with_ie(ie, u_arr, vars_old, Ae);
+
+		for(n = 0; n < NPE; ++n)
+			for(d = 0; d < DIM; ++d)
+				ix[n * DIM + d] = eix[ie * NPE + n] * DIM + d;
+
+		ierr = MatSetValuesLocal(A, NPE * DIM, ix, NPE * DIM, ix, Ae,
+					 ADD_VALUES); CHKERRQ(ierr);
+	}
+	ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
+	ierr = MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
+
+//	ierr = apply_bc_on_jac(A);
+
+	//MatView(A, PETSC_VIEWER_DRAW_WORLD);
+
+	return ierr;
 }

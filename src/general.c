@@ -155,6 +155,25 @@ void calc_stress(const int ie, const double strain[NVOI], const double *vars_old
 }
 
 
+void calc_ctan(const int ie, const double strain[NVOI], const double *vars_old, double ctan[NVOI][NVOI])
+{
+	material_t *mat = get_material(ie);
+
+	if (mat->plasticity == true) {
+
+		const double *eps_p_old = &vars_old[0];
+		const double alpha_old = vars_old[6];
+
+		plastic_get_ctan(mat, strain, eps_p_old, alpha_old, ctan);
+
+	} else {
+
+		isolin_get_ctan(mat, ctan);
+	}
+
+}
+
+
 void calc_elemental_displacements_with_ie(const int ie, const double *u_global, double u_e[NPE * DIM])
 {
 	// Calculates the elemental displacement <u_e> using the global element
