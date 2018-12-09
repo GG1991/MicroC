@@ -18,6 +18,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 #include "microc.h"
 
 
@@ -32,6 +33,7 @@ void mat_vec(const double strain_mat[3][3], const double coor[3], double disp[3]
 	}
 	return;
 }
+
 
 int bc_apply_on_u(Vec u, const double strain[6])
 {
@@ -108,4 +110,3 @@ int bc_apply_on_u(Vec u, const double strain[6])
 
 	return ierr;
 }
-

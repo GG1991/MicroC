@@ -23,24 +23,31 @@
 
 int main(void)
 {
-	int size1[3] = { 10, 10, 10 };
-	int ngp1 = 1;
-	int type1 = 2;
-	double params1[1] = { 0.2 };
+	int ierr;
+	int size[3] = { 2, 2, 2 };
+	int ngp = 100;
+	int type = 2;
+	double params[1] = { 0.2 };
 
-	material_t materials[NMATERIALS];
-	material_set(&materials[0], 1.0e8, 0.25, 1.0e8, 1.0e4, 0);
-	material_set(&materials[1], 1.0e8, 0.25, 1.0e8, 1.0e4, 0);
+	material_t material_list[NMATERIALS];
+	ierr = microc_init(ngp, size, type, params, material_list);
 
-	microc_init(ngp1, size1, type1, params1, materials);
-	microc_finish();
+	const double strain[6] = { 1., 2., 3., 1., 1., 1. };
+	const double u_exact[24] = {
+		0.00000, 0.00000, 0.00000,
+		1.00000, 0.50000, 0.50000,
+		0.50000, 2.00000, 0.50000,
+		1.50000, 2.50000, 1.00000,
+		0.50000, 0.50000, 3.00000,
+		1.50000, 1.00000, 3.50000,
+		1.00000, 2.50000, 3.50000,
+		2.00000, 3.00000, 4.00000 };
 
-	int size2[3] = { 20, 20, 20 };
-	int ngp2 = 10;
-	int type2 = 5;
-	double params2[1] = { 0.3 };
+	ierr = VecZeroEntries(u);
+	double norm = assembly_res(b, u, NULL);
 
-	microc_init(ngp2, size2, type2, params2, materials);
+	VecView(u, PETSC_VIEWER_STDOUT_WORLD);
+
 	microc_finish();
 
 	return 0;

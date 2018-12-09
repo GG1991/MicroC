@@ -23,7 +23,7 @@
 
 
 int microc_init(const int _ngp, const int _size[3], const int _type,
-		const double *_params)
+		const double *_params, const material_t *_materials)
 {
 
 	int ierr;
@@ -41,6 +41,10 @@ int microc_init(const int _ngp, const int _size[3], const int _type,
 
 	printf("\nMicroC : A HPC for FE2 Multi-scale Simulations\n\n");
 
+	int m;
+	for (m = 0; m < NMATERIALS; ++m)
+		memcpy(&material_list[m], &_materials[m], sizeof(material_t));
+
 	lx = LX;
 	ly = LY;
 	lz = LZ;
@@ -52,9 +56,9 @@ int microc_init(const int _ngp, const int _size[3], const int _type,
 	newton_max_its = NEWTON_MAX_ITS;
 	newton_min_tol = NEWTON_MIN_TOL;
 
-	DMBoundaryType bx = DM_BOUNDARY_NONE, by = DM_BOUNDARY_NONE,
-		       bz = DM_BOUNDARY_NONE;
-	ierr = DMDACreate3d(PETSC_COMM_WORLD, bx, by, bz, DMDA_STENCIL_BOX,
+	ierr = DMDACreate3d(PETSC_COMM_WORLD,
+			    DM_BOUNDARY_NONE, DM_BOUNDARY_NONE, DM_BOUNDARY_NONE,
+			    DMDA_STENCIL_BOX,
 			    nx, ny, nz,
 			    PETSC_DECIDE, PETSC_DECIDE, PETSC_DECIDE,
 			    DIM, 1, NULL, NULL, NULL, &da);
@@ -66,17 +70,9 @@ int microc_init(const int _ngp, const int _size[3], const int _type,
 	ierr = DMCreateGlobalVector(da, &b); CHKERRQ(ierr);
 	ierr = DMCreateGlobalVector(da, &du); CHKERRQ(ierr);
 
-
 	int npe;
 	ierr = DMDAGetElements(da, &nelem, &npe, &eix); CHKERRQ(ierr);
 	assert(npe == NPE);
-
-	ierr = VecSetOption(u, VEC_IGNORE_NEGATIVE_INDICES, PETSC_TRUE);
-	ierr = VecSetOption(b, VEC_IGNORE_NEGATIVE_INDICES, PETSC_TRUE);
-
-	ierr = VecZeroEntries(u); CHKERRQ(ierr);
-	ierr = VecZeroEntries(b); CHKERRQ(ierr);
-	ierr = VecZeroEntries(du); CHKERRQ(ierr);
 
 	PetscInt M, N, P;
 	ierr = DMDAGetInfo(da, 0, &M, &N, &P, 0, 0, 0, 0, 0, 0, 0, 0, 0);

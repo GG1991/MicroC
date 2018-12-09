@@ -27,11 +27,12 @@ int solve(Mat A, Vec b, Vec x, double *_err)
 }
 
 
-int newton_raphson(bool non_linear, double strain[NVOI], double *vars_old, 
-		   Vec u, double _newton_err[NEWTON_MAX_ITS],
-		   int _solver_its[NEWTON_MAX_ITS], double _solver_err[NEWTON_MAX_ITS])
+int newton_raphson(bool non_linear, double strain[NVOI], double *vars_old, Vec u,
+		   double _newton_err[NEWTON_MAX_ITS],
+		   int _solver_its[NEWTON_MAX_ITS],
+		   double _solver_err[NEWTON_MAX_ITS])
 {
-	//set_displ_bc(strain, u);
+	bc_apply_on_u(u, strain);
 
 	int ierr, lits = 0;
 	double lerr, lerr0;

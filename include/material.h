@@ -30,6 +30,8 @@
 #define SQRT_2DIV3     0.816496581
 #define D_EPS_CTAN     1.0e-8
 
+#define NMATERIALS     2
+
 typedef struct {
 
 	double E, nu, Ka, Sy;
@@ -39,6 +41,7 @@ typedef struct {
 
 
 } material_t;
+
 
 // material.c
 void material_set(material_t *mat, double _E, double _nu, double _Ka, double _Sy, int _type);

@@ -29,7 +29,11 @@ int main(void)
 	int type = 2;
 	double params[1] = { 0.2 };
 
-	ierr = microc_init(ngp, size, type, params);
+	material_t materials[NMATERIALS];
+	material_set(&materials[0], 1.0e8, 0.25, 1.0e8, 1.0e4, 0);
+	material_set(&materials[1], 1.0e8, 0.25, 1.0e8, 1.0e4, 0);
+
+	ierr = microc_init(ngp, size, type, params, materials);
 
 	const double strain[6] = { 1., 2., 3., 1., 1., 1. };
 	const double u_exact[24] = {
@@ -53,9 +57,6 @@ int main(void)
 		assert(fabs(u_arr[i] - u_exact[i]) < 1.0e-5);
 	ierr = VecRestoreArray(u, &u_arr); CHKERRQ(ierr);
 
-	microc_finish();
-
-	ierr = microc_init(ngp, size, type, params);
 	microc_finish();
 
 	return 0;

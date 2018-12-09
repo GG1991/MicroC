@@ -28,7 +28,11 @@ int main(void)
 	int type = 2;
 	double params[1] = { 0.2 };
 
-	microc_init(ngp, size, type, params);
+	material_t materials[NMATERIALS];
+	material_set(&materials[0], 1.0e8, 0.25, 1.0e8, 1.0e4, 0);
+	material_set(&materials[1], 1.0e8, 0.25, 1.0e8, 1.0e4, 0);
+
+	microc_init(ngp, size, type, params, materials);
 
 	const double strain[6] = { 0.2, 0.1, -0.3, 5.7, 2.0, -4.9 };
 	double strain_get[6];

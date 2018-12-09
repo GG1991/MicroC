@@ -35,6 +35,7 @@
 
 #define nod_index(i,j,k)   ((k) * nx * ny + (j) * nx + (i))
 
+
 #define NGP            8
 #define NPE            8
 #define NVOI           6
@@ -97,7 +98,7 @@ double *bc_value;
 const int *eix;
 
 gp_t *gp_list;
-material_t material_list[2];
+material_t material_list[NMATERIALS];
 
 DM da;
 PC pc;
@@ -106,7 +107,7 @@ Mat A, A0;
 Vec u, du, b;
 
 // init.c
-int microc_init(const int ngp, const int size[3], const int micro_type,	const double *micro_params);
+int microc_init(const int ngp, const int size[3], const int micro_type, const double *micro_params, const material_t *_material);
 int microc_finish(void);
 
 // homogenize.c

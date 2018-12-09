@@ -46,7 +46,7 @@ include_directories(include ${CMAKE_BINARY_DIR} ${MICROC_INC} ${PETSC_INC})
 file(GLOB SOURCESLIB src/*.c)
 
 add_library(microc ${SOURCESLIB})
-target_link_libraries(microc ${PETSC_LIB})
+target_link_libraries(microc ${PETSC_LIB} m)
 
 enable_testing()
 add_subdirectory(test)

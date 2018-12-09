@@ -6,6 +6,8 @@ set(testsources
 	test_init.c
 	test_set_strain.c
 	test_bc_apply_on_u.c
+	test_assembly_res.c
+	test_get_stress.c
 	)
 
 # Iterate over the list above
@@ -25,3 +27,5 @@ endforeach ()
 add_test(NAME test_init COMMAND test_init)
 add_test(NAME test_set_strain COMMAND test_set_strain)
 add_test(NAME test_bc_apply_on_u COMMAND test_bc_apply_on_u)
+add_test(NAME test_assembly_res COMMAND test_assembly_res)
+add_test(NAME test_get_stress COMMAND test_get_stress)
