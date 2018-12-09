@@ -31,13 +31,13 @@ int main(void)
 	microc_init(ngp1, size1, type1, params1);
 	microc_finish();
 
-//	int size2[3] = { 50, 50, 50 };
-//	int ngp2 = 10;
-//	int type2 = 5;
-//	double params2[1] = { 0.3 };
+	int size2[3] = { 20, 20, 20 };
+	int ngp2 = 10;
+	int type2 = 5;
+	double params2[1] = { 0.3 };
 
-//	microc_init(ngp2, size2, type2, params2);
-//	microc_finish();
+	microc_init(ngp2, size2, type2, params2);
+	microc_finish();
 
 	return 0;
 }

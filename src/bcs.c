@@ -40,9 +40,9 @@ int bc_apply_on_u(Vec u, const double strain[6])
 	int count = 0;
 	double disp[3];
 	double strain_mat[3][3] = {
-		{ strain[0], strain[3], strain[4] },
-		{ strain[3], strain[1], strain[5] },
-		{ strain[4], strain[5], strain[2] } };
+		{      strain[0], .5 * strain[3], .5 * strain[4] },
+		{ .5 * strain[3],      strain[1], .5 * strain[5] },
+		{ .5 * strain[4], .5 * strain[5],      strain[2] } };
 
 	/* Y = 0 */
 	for (i = 0; i < nx; ++i) {

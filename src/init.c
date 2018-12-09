@@ -27,10 +27,17 @@ int microc_init(const int _ngp, const int _size[3], const int _type,
 {
 
 	int ierr;
+	if (!first_init) {
+		// This is done to call init multiple time without causing
+		// errors
+		ierr = MPI_Init(NULL, NULL);
+		first_init = 1;
+	}
+
 	ierr = PetscInitialize(NULL, NULL, (char*)0, help);
 
-       	if(ierr)
-	       	return ierr;
+	if(ierr)
+		return ierr;
 
 	printf("\nMicroC : A HPC for FE2 Multi-scale Simulations\n\n");
 

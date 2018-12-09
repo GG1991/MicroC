@@ -71,6 +71,8 @@ static double xg[8][3] = {
 
 static char help[] = "FE code to solve macroscopic problems with PETSc.\n";
 
+int first_init; // variable to know if init was called
+
 double lx, ly, lz, dx, dy, dz;
 double wg;
 
