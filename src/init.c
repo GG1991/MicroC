@@ -115,6 +115,67 @@ int microc_init(const int _ngp, const int _size[3], const int _type,
 		gp_list[gp].u_k = (double *) calloc(nndim, sizeof(double));
 	}
 
+	// Set BC structures
+	nbcs = ((nx * nz) + (nx * ny) + (ny * nz)) * 2 * DIM;
+	bc_index = malloc(nbcs * sizeof(int));
+	bc_value = malloc(nbcs * sizeof(double));
+
+	int i, j, k, d;
+	int count = 0;
+
+	/* Y = 0 */
+	for (i = 0; i < nx; ++i) {
+		for (k = 0; k < nz; ++k) {
+			const int ix = nod_index(i, 0, k);
+			for (d = 0; d < DIM; ++d)
+				bc_index[count++] = ix * DIM + d;
+		}
+	}
+
+	/* Y = LY */
+	for (i = 0; i < nx; ++i) {
+		for (k = 0; k < nz; ++k) {
+			const int ix = nod_index(i, ny - 1, k);
+			for (d = 0; d < DIM; ++d)
+				bc_index[count++] = ix * DIM + d;
+		}
+	}
+
+	/* Z = 0 */
+	for (i = 0; i < nx; ++i) {
+		for (j = 0; j < ny; ++j) {
+			const int ix = nod_index(i, j, 0);
+			for (d = 0; d < DIM; ++d)
+				bc_index[count++] = ix * DIM + d;
+		}
+	}
+
+	/* Z = LZ */
+	for (i = 0; i < nx; ++i) {
+		for (k = 0; k < ny; ++k) {
+			const int ix = nod_index(i, j, nz - 1);
+			for (d = 0; d < DIM; ++d)
+				bc_index[count++] = ix * DIM + d;
+		}
+	}
+				
+	/* X = 0 */
+	for (j = 0; j < ny; ++j) {
+		for (k = 0; k < nz; ++k) {
+			const int ix = nod_index(0, j, k);
+			for (d = 0; d < DIM; ++d)
+				bc_index[count++] = ix * DIM + d;
+		}
+	}
+
+	/* X = LX */
+	for (j = 0; j < ny; ++j) {
+		for (k = 0; k < nz; ++k) {
+			const int ix = nod_index(nx - 1, j, k);
+			for (d = 0; d < DIM; ++d)
+				bc_index[count++] = ix * DIM + d;
+		}
+	}
 
 	return ierr;
 }
@@ -128,6 +189,9 @@ int microc_finish(void)
 	ierr = VecDestroy(&b); CHKERRQ(ierr);
 	ierr = VecDestroy(&du); CHKERRQ(ierr);
 	ierr = KSPDestroy(&ksp); CHKERRQ(ierr);
+
+	free(bc_index);
+	free(bc_value);
 
 	ierr = PetscFinalize(); CHKERRQ(ierr);
 	return ierr;

@@ -33,6 +33,8 @@
 #include "gp.h"
 #include "material.h"
 
+#define nod_index(i,j,k)   ((k)*nx*ny + (j)*nx + (i))
+
 #define NGP            8
 #define NPE            8
 #define NVOI           6
@@ -86,6 +88,10 @@ int *elem_type;
 int micro_type;
 double special_param;
 
+int nbcs;
+int *bc_index;
+double *bc_value;
+
 const int *eix;
 
 gp_t *gp_list;
@@ -122,5 +128,9 @@ void get_elem_rhs_with_ie(const int ie, const double *u, const double *varsold, 
 void get_elem_mat_with_ie(const int ie, const double *u_global, const double *varsold, double be[NPE * DIM]);
 double assembly_res(Vec b, Vec u, double *vars_old);
 int assembly_jac(Mat A, Vec u, double *vars_old);
+
+// bcs.c
+void mat_vec(const double strain_mat[3][3], const double coor[3], double disp[3]);
+int bc_apply_on_u(Vec u, double strain[6]);
 
 #endif

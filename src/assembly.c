@@ -118,11 +118,10 @@ double assembly_res(Vec b, Vec u, double *vars_old)
 	ierr = VecRestoreArray(b, &b_arr); CHKERRQ(ierr);
 	ierr = VecRestoreArray(u, &u_arr); CHKERRQ(ierr);
 
-	//VecView(b, PETSC_VIEWER_STDOUT_WORLD);
-
 //	ierr = apply_bc_on_res(b);
 
 	ierr = VecScale(b, -1.); CHKERRQ(ierr);
+//      VecView(b, PETSC_VIEWER_STDOUT_WORLD);
 
 	double norm;
 	VecNorm(b, NORM_2, &norm);
