@@ -27,13 +27,13 @@ void mat_vec(const double strain_mat[3][3], const double coor[3], double disp[3]
 	for (i = 0; i < 3; ++i) {
 		disp[i] = 0.0;
 		for (j = 0; j < 3; ++j) {
-			disp[i] = strain_mat[i][j] * coor[j];
+			disp[i] += strain_mat[i][j] * coor[j];
 		}
 	}
 	return;
 }
 
-int bc_apply_on_u(Vec u, double strain[6])
+int bc_apply_on_u(Vec u, const double strain[6])
 {
 	int ierr;
 	int i, j, k, d;
@@ -105,8 +105,6 @@ int bc_apply_on_u(Vec u, double strain[6])
 	}
 
 	ierr = VecSetValues(u, nbcs, bc_index, bc_value, INSERT_VALUES); CHKERRQ(ierr);
-	ierr = VecAssemblyBegin(u); CHKERRQ(ierr);
-	ierr = VecAssemblyEnd(u); CHKERRQ(ierr);
 
 	return ierr;
 }

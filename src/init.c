@@ -152,7 +152,7 @@ int microc_init(const int _ngp, const int _size[3], const int _type,
 
 	/* Z = LZ */
 	for (i = 0; i < nx; ++i) {
-		for (k = 0; k < ny; ++k) {
+		for (j = 0; j < ny; ++j) {
 			const int ix = nod_index(i, j, nz - 1);
 			for (d = 0; d < DIM; ++d)
 				bc_index[count++] = ix * DIM + d;
