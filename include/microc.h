@@ -122,7 +122,7 @@ void microc_homogenize();
 void calc_strain(const double u_e[NPE * DIM], const double B[NVOI][NPE * DIM], double strain[6]);
 void calc_stress(const int ie, const double strain[NVOI], const double *vars_old, double stress[NVOI]);
 void calc_ctan(const int ie, const double strain[NVOI], const double *vars_old, double ctan[NVOI][NVOI]);
-void calc_B(int gp, double B[6][NPE * DIM]);
+void calc_B(int gp, double B[NVOI][NPE * DIM]);
 int get_elem_type(const int ex, const int ey, const int ez);
 material_t *get_material(const int ie);
 void calc_elemental_displacements_with_ie(const int ie, const double *u_global, double u_e[NPE * DIM]);
@@ -135,6 +135,6 @@ int assembly_jac(Mat A, Vec u, double *vars_old);
 
 // bcs.c
 void mat_vec(const double strain_mat[3][3], const double coor[3], double disp[3]);
-int bc_apply_on_u(Vec u, const double strain[6]);
+int bc_apply_on_u(Vec u, const double strain[NVOI]);
 
 #endif

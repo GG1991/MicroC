@@ -16,6 +16,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
  */
 
 
@@ -24,7 +25,7 @@
 int main(void)
 {
 	int ierr;
-	int size[3] = { 10, 10, 10 };
+	int size[3] = { 2, 2, 2 };
 	int ngp = 100;
 	int type = 2;
 	double params[1] = { 0.2 };
@@ -35,18 +36,37 @@ int main(void)
 
 	ierr = microc_init(ngp, size, type, params, materials);
 
-	const double strain[6] = { 1., 2., 3., 1., 1., 1. };
-	const double stress_exact[6] = { 320000000, 400000000, 480000000, 40000000, 40000000, 40000000};
+	const double strain_macro[6][6] = {
+	       	{1., 0., 0., 0., 0., 0. },
+	       	{0., 1., 0., 0., 0., 0. },
+	       	{0., 0., 1., 0., 0., 0. },
+	       	{0., 0., 0., 1., 0., 0. },
+	       	{0., 0., 0., 0., 1., 0. },
+	       	{0., 0., 0., 0., 0., 1. }
+	};
 
-	double stress[6] = { 0.0 };
-	const double vars_old[6] = { 0. };
+	double strain[6];
 
-	int i, e;
-	for (e = 0; e < nelem; ++e) {
-		calc_stress(e, strain, vars_old, stress);
-		for (i = 0; i < 6; ++i)
-			assert(fabs(stress[i] - stress_exact[i]) < 1.0e-5);
+	double B[NVOI][NPE * DIM];
+	double u_e[NPE * DIM];
+	double *u_arr;
+
+	int i, j, e = 0, gp = 0;
+
+	ierr = VecGetArray(u, &u_arr); CHKERRQ(ierr);
+
+	for (i = 0; i < 6; ++i) {
+
+		ierr = bc_apply_on_u(u, strain_macro[i]);
+		calc_elemental_displacements_with_ie(e, u_arr, u_e);
+
+		calc_B(gp, B);
+		calc_strain(u_e, B, strain);
+		for (j = 0; j < 6; ++j)
+			assert(fabs(strain[j] - strain_macro[i][j]) < 1.0e-5);
 	}
+
+	ierr = VecRestoreArray(u, &u_arr); CHKERRQ(ierr);
 
 	microc_finish();
 

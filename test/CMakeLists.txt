@@ -8,6 +8,7 @@ set(testsources
 	test_bc_apply_on_u.c
 	test_assembly_res.c
 	test_calc_stress.c
+	test_calc_strain.c
 	)
 
 # Iterate over the list above
@@ -29,3 +30,4 @@ add_test(NAME test_set_strain COMMAND test_set_strain)
 add_test(NAME test_bc_apply_on_u COMMAND test_bc_apply_on_u)
 add_test(NAME test_assembly_res COMMAND test_assembly_res)
 add_test(NAME test_calc_stress COMMAND test_calc_stress)
+add_test(NAME test_calc_strain COMMAND test_calc_strain)

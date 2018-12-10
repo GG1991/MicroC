@@ -187,12 +187,14 @@ void calc_elemental_displacements_with_ie(const int ie, const double *u_global, 
 }
 
 
-void calc_strain(const double u_e[NPE * DIM], const double B[NVOI][NPE * DIM], double strain[6])
+void calc_strain(const double u_e[NPE * DIM], const double B[NVOI][NPE * DIM], double strain[NVOI])
 {
 	/* Calculates the strain using the elemental displacements <u_e> and <B>
 	 * strain = B * u_e
 	*/
 	int i, j;
+
+	memset(strain, 0.0, NVOI * sizeof(double));
 	for(i = 0; i < NVOI; ++i)
 		for(j = 0; j < NPE * DIM; ++j)
 			strain[i] += B[i][j] * u_e[j];
@@ -200,61 +202,61 @@ void calc_strain(const double u_e[NPE * DIM], const double B[NVOI][NPE * DIM], d
 }
 
 
-void calc_B(int gp, double B[6][NPE * DIM])
+void calc_B(int gp, double B[NVOI][NPE * DIM])
 {
 	int i;
 
 	const double dsh[NPE][DIM] = {
 		{
-			-(1 - xg[gp][1]) * (1 - xg[gp][2]) / 8. * 2. / dx,
-			-(1 - xg[gp][0]) * (1 - xg[gp][2]) / 8. * 2. / dy,
-			-(1 - xg[gp][0]) * (1 - xg[gp][1]) / 8. * 2. / dz },
+			-(1 - xg[gp][1]) * (1 - xg[gp][2]) * 0.25 / dx,
+			-(1 - xg[gp][0]) * (1 - xg[gp][2]) * 0.25 / dy,
+			-(1 - xg[gp][0]) * (1 - xg[gp][1]) * 0.25 / dz },
 		{
-			+(1 - xg[gp][1]) * (1 - xg[gp][2]) / 8. * 2. / dx,
-			-(1 + xg[gp][0]) * (1 - xg[gp][2]) / 8. * 2. / dy,
-			-(1 + xg[gp][0]) * (1 - xg[gp][1]) / 8. * 2. / dz },
+			+(1 - xg[gp][1]) * (1 - xg[gp][2]) * 0.25 / dx,
+			-(1 + xg[gp][0]) * (1 - xg[gp][2]) * 0.25 / dy,
+			-(1 + xg[gp][0]) * (1 - xg[gp][1]) * 0.25 / dz },
 		{
-			+(1 + xg[gp][1]) * (1 - xg[gp][2]) / 8. * 2. / dx,
-			+(1 + xg[gp][0]) * (1 - xg[gp][2]) / 8. * 2. / dy,
-			-(1 + xg[gp][0]) * (1 + xg[gp][1]) / 8. * 2. / dz },
+			+(1 + xg[gp][1]) * (1 - xg[gp][2]) * 0.25 / dx,
+			+(1 + xg[gp][0]) * (1 - xg[gp][2]) * 0.25 / dy,
+			-(1 + xg[gp][0]) * (1 + xg[gp][1]) * 0.25 / dz },
 		{
-			-(1 + xg[gp][1]) * (1 - xg[gp][2]) / 8. * 2. / dx,
-			+(1 - xg[gp][0]) * (1 - xg[gp][2]) / 8. * 2. / dy,
-			-(1 - xg[gp][0]) * (1 + xg[gp][1]) / 8. * 2. / dz },
+			-(1 + xg[gp][1]) * (1 - xg[gp][2]) * 0.25 / dx,
+			+(1 - xg[gp][0]) * (1 - xg[gp][2]) * 0.25 / dy,
+			-(1 - xg[gp][0]) * (1 + xg[gp][1]) * 0.25 / dz },
 		{
-			-(1 - xg[gp][1]) * (1 + xg[gp][2]) / 8. * 2. / dx,
-			-(1 - xg[gp][0]) * (1 + xg[gp][2]) / 8. * 2. / dy,
-			+(1 - xg[gp][0]) * (1 - xg[gp][1]) / 8. * 2. / dz },
+			-(1 - xg[gp][1]) * (1 + xg[gp][2]) * 0.25 / dx,
+			-(1 - xg[gp][0]) * (1 + xg[gp][2]) * 0.25 / dy,
+			+(1 - xg[gp][0]) * (1 - xg[gp][1]) * 0.25 / dz },
 		{
-			+(1 - xg[gp][1]) * (1 + xg[gp][2]) / 8. * 2. / dx,
-			-(1 + xg[gp][0]) * (1 + xg[gp][2]) / 8. * 2. / dy,
-			+(1 + xg[gp][0]) * (1 - xg[gp][1]) / 8. * 2. / dz },
+			+(1 - xg[gp][1]) * (1 + xg[gp][2]) * 0.25 / dx,
+			-(1 + xg[gp][0]) * (1 + xg[gp][2]) * 0.25 / dy,
+			+(1 + xg[gp][0]) * (1 - xg[gp][1]) * 0.25 / dz },
 		{
-			+(1 + xg[gp][1]) * (1 + xg[gp][2]) / 8. * 2. / dx,
-			+(1 + xg[gp][0]) * (1 + xg[gp][2]) / 8. * 2. / dy,
-			+(1 + xg[gp][0]) * (1 + xg[gp][1]) / 8. * 2. / dz },
+			+(1 + xg[gp][1]) * (1 + xg[gp][2]) * 0.25 / dx,
+			+(1 + xg[gp][0]) * (1 + xg[gp][2]) * 0.25 / dy,
+			+(1 + xg[gp][0]) * (1 + xg[gp][1]) * 0.25 / dz },
 		{
-			-(1 + xg[gp][1]) * (1 + xg[gp][2]) / 8. * 2. / dx,
-			+(1 - xg[gp][0]) * (1 + xg[gp][2]) / 8. * 2. / dy,
-			+(1 - xg[gp][0]) * (1 + xg[gp][1]) / 8. * 2. / dz } };
+			-(1 + xg[gp][1]) * (1 + xg[gp][2]) * 0.25 / dx,
+			+(1 - xg[gp][0]) * (1 + xg[gp][2]) * 0.25 / dy,
+			+(1 - xg[gp][0]) * (1 + xg[gp][1]) * 0.25 / dz } };
 
 	for (i = 0; i < NPE; ++i) {
 		B[0][i * DIM    ] = dsh[i][0];
-		B[0][i * DIM + 1] = 0;
-		B[0][i * DIM + 2] = 0;
-		B[1][i * DIM    ] = 0;
+		B[0][i * DIM + 1] = 0.0;
+		B[0][i * DIM + 2] = 0.0;
+		B[1][i * DIM    ] = 0.0;
 		B[1][i * DIM + 1] = dsh[i][1];
-		B[1][i * DIM + 2] = 0;
-		B[2][i * DIM    ] = 0;
-		B[2][i * DIM + 1] = 0;
+		B[1][i * DIM + 2] = 0.0;
+		B[2][i * DIM    ] = 0.0;
+		B[2][i * DIM + 1] = 0.0;
 		B[2][i * DIM + 2] = dsh[i][2];
 		B[3][i * DIM    ] = dsh[i][1];
 		B[3][i * DIM + 1] = dsh[i][0];
-		B[3][i * DIM + 2] = 0;
+		B[3][i * DIM + 2] = 0.0;
 		B[4][i * DIM    ] = dsh[i][2];
-		B[4][i * DIM + 1] = 0;
+		B[4][i * DIM + 1] = 0.0;
 		B[4][i * DIM + 2] = dsh[i][0];
-		B[5][i * DIM    ] = 0;
+		B[5][i * DIM    ] = 00.;
 		B[5][i * DIM + 1] = dsh[i][2];
 		B[5][i * DIM + 2] = dsh[i][1];
 	}
