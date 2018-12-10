@@ -98,6 +98,8 @@ int microc_init(const int _ngp, const int _size[3], const int _type,
 	dz = lz / (P - 1);
 	wg = dx * dy * dz / NPE;
 
+	solver = PETSC_CG;
+
 	KSPType ksptype;
 	PetscReal rtol, abstol, dtol;
 	PetscInt maxits;

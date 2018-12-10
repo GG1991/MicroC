@@ -45,6 +45,16 @@
 #define NEWTON_REL_TOL 1.0e-3
 #define NEWTON_MAX_ITS 2
 
+typedef struct {
+	int its;
+	double err[NEWTON_MAX_ITS];
+
+	int solver_its[NEWTON_MAX_ITS];
+	double solver_err[NEWTON_MAX_ITS];
+} newton_t;
+
+void clean_newton(newton_t *newton);
+
 #define LX             1.0
 #define LY             1.0
 #define LZ             1.0
@@ -57,6 +67,13 @@ enum {
        	MIC_QUAD_FIB_XYZ,
        	MIC_QUAD_FIB_XZ,
        	MIC_QUAD_FIB_XZ_BROKEN_X
+};
+
+enum {
+	PETSC_CG,
+	PETSC_GMRES,
+	CGPD,
+	CGPD_DEFLATED
 };
 
 #define CONSTXG        0.577350269189626
@@ -74,6 +91,7 @@ static double xg[8][3] = {
 static char help[] = "FE code to solve macroscopic problems with PETSc.\n";
 
 int first_init; // variable to know if init was called
+int solver;
 
 double lx, ly, lz, dx, dy, dz;
 double wg;
@@ -130,11 +148,15 @@ void calc_elemental_displacements_with_ie(const int ie, const double *u_global, 
 // assembly.c
 void get_elem_rhs_with_ie(const int ie, const double *u, const double *varsold, double be[NPE * DIM]);
 void get_elem_mat_with_ie(const int ie, const double *u_global, const double *varsold, double be[NPE * DIM]);
-double assembly_res(Vec b, Vec u, double *vars_old);
-int assembly_jac(Mat A, Vec u, double *vars_old);
+double assembly_res(Vec b, Vec u, const double *vars_old);
+int assembly_jac(Mat A, Vec u, const double *vars_old);
 
 // bcs.c
 void mat_vec(const double strain_mat[3][3], const double coor[3], double disp[3]);
 int bc_apply_on_u(Vec u, const double strain[NVOI]);
+
+// solve.c
+int solve(Mat A, Vec b, Vec x, double *_err);
+int newton_raphson(const bool non_linear, const double strain[NVOI], const double *vars_old, Vec u, newton_t *newton);
 
 #endif

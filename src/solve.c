@@ -24,13 +24,30 @@
 
 int solve(Mat A, Vec b, Vec x, double *_err)
 {
+	int ierr;
+	int its;
+	double norm;
+	switch (solver) {
+		case (PETSC_CG || PETSC_GMRES):
+			ierr = KSPSolve(ksp, b, x); CHKERRQ(ierr);
+			ierr = KSPGetIterationNumber(ksp, &its);
+			ierr = KSPGetResidualNorm(ksp, &norm);
+			break;
+
+		case (CGPD):
+			// MicroC solver implementation of the CG with
+			// Diagonal Preconditioner
+			break;
+		default:
+			ierr = 1;
+			break;
+	}
+	printf("KSP : |Ax - b|/|Ax| = %e\tIts = %d\n", norm, its);
+	return its;
 }
 
 
-int newton_raphson(bool non_linear, double strain[NVOI], double *vars_old, Vec u,
-		   double _newton_err[NEWTON_MAX_ITS],
-		   int _solver_its[NEWTON_MAX_ITS],
-		   double _solver_err[NEWTON_MAX_ITS])
+int newton_raphson(const bool non_linear, const double strain[NVOI], const double *vars_old, Vec u, newton_t *newton)
 {
 	bc_apply_on_u(u, strain);
 
@@ -39,9 +56,9 @@ int newton_raphson(bool non_linear, double strain[NVOI], double *vars_old, Vec u
 	int solver_its;
 	double solver_err;
 
-	if (_solver_its != NULL) memset(_solver_its, 0, NEWTON_MAX_ITS * sizeof(int));
-	if (_solver_err != NULL) memset(_solver_err, 0, NEWTON_MAX_ITS * sizeof(double));
-	if (_newton_err != NULL) memset(_newton_err, 0, NEWTON_MAX_ITS * sizeof(double));
+	if (!newton) return 1;
+
+	clean_newton(newton);
 
 	while (lits < NEWTON_MAX_ITS) {
 
@@ -50,8 +67,7 @@ int newton_raphson(bool non_linear, double strain[NVOI], double *vars_old, Vec u
 		if (lits == 0)
 			lerr0 = lerr;
 
-		if (_newton_err != NULL)
-		       	_newton_err[lits] = lerr;
+		newton->err[lits] = lerr;
 
 		if (lerr < NEWTON_MIN_TOL || lerr < lerr0 * NEWTON_REL_TOL)
 			break;
@@ -67,8 +83,8 @@ int newton_raphson(bool non_linear, double strain[NVOI], double *vars_old, Vec u
 
 		}
 
-		if (_solver_its != NULL) _solver_its[lits] = solver_its;
-		if (_solver_err != NULL) _solver_err[lits] = solver_err;
+		newton->solver_its[lits] = solver_its;
+		newton->solver_err[lits] = solver_err;
 
 		ierr = VecAXPY(u, 1., du); CHKERRQ(ierr);
 
@@ -77,4 +93,14 @@ int newton_raphson(bool non_linear, double strain[NVOI], double *vars_old, Vec u
 	}
 
 	return lits;
+}
+
+
+void clean_newton(newton_t *newton)
+{
+	newton->its = 0;
+	memset(newton->err, 0.0, NEWTON_MAX_ITS * sizeof(double));
+	memset(newton->solver_its, 0, NEWTON_MAX_ITS * sizeof(int));
+	memset(newton->solver_err, 0.0, NEWTON_MAX_ITS * sizeof(double));
+	return;
 }
