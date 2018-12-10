@@ -126,7 +126,11 @@ Mat A, A0;
 Vec u, du, b;
 
 // init.c
-int microc_init(const int ngp, const int size[3], const int micro_type, const double *micro_params, const material_t *_material);
+int microc_init(const int _ngp, const int _size[3], const int _type,
+		const double *_params, const material_t *_materials);
+int microc_initv(const int _ngp, const int _size[3], const int _micro_type,
+		 const double *_micro_params, const material_t *_material,
+		 int _argc, char **_argv);
 int microc_finish(void);
 
 // homogenize.c

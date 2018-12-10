@@ -25,11 +25,18 @@
 int solve(Mat A, Vec b, Vec x, double *_err)
 {
 	int ierr;
-	int its;
-	double norm;
+	int its = -1;
+	double norm = -1;
+			PetscViewer viewer;
+
 	switch (solver) {
-		case (PETSC_CG || PETSC_GMRES):
+		case PETSC_CG:
+
+			ierr = KSPSetOperators(ksp, A, A); CHKERRQ(ierr);
+			ierr = KSPSetUp(ksp); CHKERRQ(ierr);
+
 			ierr = KSPSolve(ksp, b, x); CHKERRQ(ierr);
+
 			ierr = KSPGetIterationNumber(ksp, &its);
 			ierr = KSPGetResidualNorm(ksp, &norm);
 			break;
@@ -62,7 +69,7 @@ int newton_raphson(const bool non_linear, const double strain[NVOI], const doubl
 
 	while (lits < NEWTON_MAX_ITS) {
 
-		lerr = assembly_res(u, b, vars_old);
+		lerr = assembly_res(b, u, vars_old);
 
 		if (lits == 0)
 			lerr0 = lerr;

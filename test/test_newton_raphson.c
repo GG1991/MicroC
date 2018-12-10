@@ -24,7 +24,7 @@
 int main(void)
 {
 	int ierr;
-	int size[3] = { 3, 3, 3 };
+	int size[3] = { 10, 10, 10 };
 	int ngp = 100;
 	int type = 2;
 	double params[1] = { 0.2 };

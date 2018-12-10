@@ -161,7 +161,7 @@ int assembly_jac(Mat A, Vec u, const double *vars_old)
 
 	ierr = MatZeroRowsColumns(A, nbcs, bc_index, 1.0, NULL, NULL); CHKERRQ(ierr);
 	ierr = VecRestoreArray(u, &u_arr); CHKERRQ(ierr);
-	MatView(A, PETSC_VIEWER_DRAW_WORLD);
+	//MatView(A, PETSC_VIEWER_DRAW_WORLD);
 
 	return ierr;
 }

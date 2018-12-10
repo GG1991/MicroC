@@ -25,6 +25,14 @@
 int microc_init(const int _ngp, const int _size[3], const int _type,
 		const double *_params, const material_t *_materials)
 {
+	return microc_initv(_ngp, _size, _type, _params, _materials, 0, NULL);
+}
+
+
+int microc_initv(const int _ngp, const int _size[3], const int _type,
+		const double *_params, const material_t *_materials,
+		int argc, char **argv)
+{
 
 	int ierr;
 	if (!first_init) {
@@ -66,6 +74,7 @@ int microc_init(const int _ngp, const int _size[3], const int _type,
 	ierr = DMSetMatType(da, MATAIJ); CHKERRQ(ierr);
 	ierr = DMSetUp(da); CHKERRQ(ierr);
 	ierr = DMCreateMatrix(da, &A); CHKERRQ(ierr);
+	ierr = DMCreateMatrix(da, &A0); CHKERRQ(ierr);
 	ierr = DMCreateGlobalVector(da, &u); CHKERRQ(ierr);
 	ierr = DMCreateGlobalVector(da, &b); CHKERRQ(ierr);
 	ierr = DMCreateGlobalVector(da, &du); CHKERRQ(ierr);
@@ -105,17 +114,10 @@ int microc_init(const int _ngp, const int _size[3], const int _type,
 	PetscInt maxits;
 
 	ierr = KSPCreate(PETSC_COMM_WORLD, &ksp); CHKERRQ(ierr);
-	ierr = KSPSetOperators(ksp, A, A); CHKERRQ(ierr);
 	ierr = KSPSetType(ksp, KSPCG); CHKERRQ(ierr);
 	ierr = KSPGetPC(ksp, &pc); CHKERRQ(ierr);
-	ierr = PCSetType(pc, PCJACOBI); CHKERRQ(ierr);
 	ierr = KSPSetFromOptions(ksp); CHKERRQ(ierr);
-	ierr = KSPSetUp(ksp); CHKERRQ(ierr);
-
-	ierr = KSPGetTolerances(ksp, &rtol, &abstol, &dtol, &maxits);
-	ierr = KSPGetType(ksp, &ksptype);
-	printf("KSP Info: type = %s\trtol = %e\tabstol = %e\tdtol = %e\tmaxits = %d\n",
-	       ksptype, rtol, abstol, dtol, maxits);
+	ierr = PCSetType(pc, PCJACOBI); CHKERRQ(ierr);
 
 
 	// Init <struct gp_t> list
@@ -189,6 +191,9 @@ int microc_init(const int _ngp, const int _size[3], const int _type,
 				bc_index[count++] = ix * DIM + d;
 		}
 	}
+
+	ierr = VecZeroEntries(u);
+	ierr = assembly_jac(A0, u, NULL);
 
 	return ierr;
 }
