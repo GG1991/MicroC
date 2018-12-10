@@ -40,7 +40,7 @@ int main(void)
 	ierr = VecZeroEntries(u);
 
 	ierr = bc_apply_on_u(u, strain);
-	double norm = assembly_res(b, u, NULL);
+	double norm = assembly_jac(A, u, NULL);
 
 	microc_finish();
 

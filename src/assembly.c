@@ -20,7 +20,7 @@
 
 #include "microc.h"
 
-void get_elem_rhs_with_ie(const int ie, const double *u_global, const double *varsold, double be[NPE * DIM])
+void get_elem_rhs_with_ie(const int ie, const double *u_arr, const double *vars_old, double be[NPE * DIM])
 {
 	double stress[NVOI], strain[NVOI];
 	double B[NVOI][NPE * DIM];
@@ -28,7 +28,7 @@ void get_elem_rhs_with_ie(const int ie, const double *u_global, const double *va
 
 	memset(be, 0, NPE * DIM * sizeof(double));
 
-	calc_elemental_displacements_with_ie(ie, u_global, u_e);
+	calc_elemental_displacements_with_ie(ie, u_arr, u_e);
 
 	int gp;
 	for (gp = 0; gp < NPE; ++gp) {
@@ -36,7 +36,7 @@ void get_elem_rhs_with_ie(const int ie, const double *u_global, const double *va
 		calc_B(gp, B);
 
 		calc_strain(u_e, B, strain);
-		calc_stress(ie, strain, varsold, stress);
+		calc_stress(ie, strain, vars_old, stress);
 
 		for (int i = 0; i < NPE * DIM; ++i)
 			for (int j = 0; j < NVOI; ++j)
@@ -45,7 +45,7 @@ void get_elem_rhs_with_ie(const int ie, const double *u_global, const double *va
 }
 
 
-void get_elem_mat_with_ie(const int ie, const double *u_global, const double *vars_old, double Ae[NPE * DIM * NPE * DIM])
+void get_elem_mat_with_ie(const int ie, const double *u_arr, const double *vars_old, double Ae[NPE * DIM * NPE * DIM])
 {
 	int i, j, k, m;
 	double strain[NVOI], ctan[NVOI][NVOI];
@@ -55,7 +55,7 @@ void get_elem_mat_with_ie(const int ie, const double *u_global, const double *va
 
 	memset(Ae, 0, NPE * DIM * NPE * DIM * sizeof(double));
 
-	calc_elemental_displacements_with_ie(ie, u_global, u_e);
+	calc_elemental_displacements_with_ie(ie, u_arr, u_e);
 
 	int gp;
 	for (gp = 0; gp < NPE; ++gp) {
@@ -88,7 +88,7 @@ void get_elem_mat_with_ie(const int ie, const double *u_global, const double *va
 double assembly_res(Vec b, Vec u, double *vars_old)
 {
 	int ierr;
-	int ie, n, d;
+	int i, ie, n, d;
 	int ix[NPE * DIM];
 	double be[NPE * DIM * NPE * DIM];
 	double *u_arr, *b_arr;
@@ -115,13 +115,14 @@ double assembly_res(Vec b, Vec u, double *vars_old)
 			b_arr[ix[n]] += be[n];
 	}
 
+	for(i = 0; i < nbcs; ++i)
+		b_arr[bc_index[i]] = 0.0;
+
 	ierr = VecRestoreArray(b, &b_arr); CHKERRQ(ierr);
 	ierr = VecRestoreArray(u, &u_arr); CHKERRQ(ierr);
 
-//	ierr = apply_bc_on_res(b);
-
 	ierr = VecScale(b, -1.); CHKERRQ(ierr);
-//      VecView(b, PETSC_VIEWER_STDOUT_WORLD);
+	//VecView(b, PETSC_VIEWER_STDOUT_WORLD);
 
 	double norm;
 	VecNorm(b, NORM_2, &norm);
@@ -146,18 +147,16 @@ int assembly_jac(Mat A, Vec u, double *vars_old)
 		// Calculates the elemental matrix <Ae>
 		get_elem_mat_with_ie(ie, u_arr, vars_old, Ae);
 
+		// Calculates the indeces where <Ae> should be assembly
 		for(n = 0; n < NPE; ++n)
 			for(d = 0; d < DIM; ++d)
 				ix[n * DIM + d] = eix[ie * NPE + n] * DIM + d;
 
-		ierr = MatSetValuesLocal(A, NPE * DIM, ix, NPE * DIM, ix, Ae,
-					 ADD_VALUES); CHKERRQ(ierr);
+		// Sum <Ae> over <A>
+		ierr = MatSetValuesLocal(A, NPE * DIM, ix, NPE * DIM, ix, Ae, ADD_VALUES); CHKERRQ(ierr);
 	}
-	ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
-	ierr = MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
 
-//	ierr = apply_bc_on_jac(A);
-
+	ierr = MatZeroRowsColumns(A, nbcs, bc_index, 1.0, NULL, NULL);
 	//MatView(A, PETSC_VIEWER_DRAW_WORLD);
 
 	return ierr;
