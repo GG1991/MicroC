@@ -156,8 +156,12 @@ int assembly_jac(Mat A, Vec u, double *vars_old)
 		ierr = MatSetValuesLocal(A, NPE * DIM, ix, NPE * DIM, ix, Ae, ADD_VALUES); CHKERRQ(ierr);
 	}
 
-	ierr = MatZeroRowsColumns(A, nbcs, bc_index, 1.0, NULL, NULL);
-	//MatView(A, PETSC_VIEWER_DRAW_WORLD);
+	ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
+	ierr = MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
+
+	ierr = MatZeroRowsColumns(A, nbcs, bc_index, 1.0, NULL, NULL); CHKERRQ(ierr);
+	ierr = VecRestoreArray(u, &u_arr); CHKERRQ(ierr);
+	MatView(A, PETSC_VIEWER_DRAW_WORLD);
 
 	return ierr;
 }
