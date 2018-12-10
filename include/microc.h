@@ -33,7 +33,8 @@
 #include "gp.h"
 #include "material.h"
 
-#define nod_index(i,j,k)   ((k) * nx * ny + (j) * nx + (i))
+#define nod_index(i,j,k)     ((k) * nx * ny + (j) * nx + (i))
+#define elm_index(ex,ey,ez)  ((ez) * nex * ney + (ey) * nex + (ex))
 
 
 #define NGP            8

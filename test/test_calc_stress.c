@@ -24,29 +24,30 @@
 int main(void)
 {
 	int ierr;
-	int size[3] = { 2, 2, 2 };
+	int size[3] = { 10, 10, 10 };
 	int ngp = 100;
 	int type = 2;
 	double params[1] = { 0.2 };
 
-	material_t material_list[NMATERIALS];
-	ierr = microc_init(ngp, size, type, params, material_list);
+	material_t materials[NMATERIALS];
+	material_set(&materials[0], 1.0e8, 0.25, 1.0e8, 1.0e4, 0);
+	material_set(&materials[1], 1.0e8, 0.25, 1.0e8, 1.0e4, 1);
+
+	ierr = microc_init(ngp, size, type, params, materials);
 
 	const double strain[6] = { 1., 2., 3., 1., 1., 1. };
-	const double u_exact[24] = {
-		0.00000, 0.00000, 0.00000,
-		1.00000, 0.50000, 0.50000,
-		0.50000, 2.00000, 0.50000,
-		1.50000, 2.50000, 1.00000,
-		0.50000, 0.50000, 3.00000,
-		1.50000, 1.00000, 3.50000,
-		1.00000, 2.50000, 3.50000,
-		2.00000, 3.00000, 4.00000 };
+	const double stress_exact[6] = { 320000000, 400000000, 480000000, 40000000, 40000000, 40000000};
 
-	ierr = VecZeroEntries(u);
-	double norm = assembly_res(b, u, NULL);
+	double stress[6] = { 0.0 };
+	const double vars_old[6] = { 0. };
 
-	VecView(u, PETSC_VIEWER_STDOUT_WORLD);
+	int i, e;
+	for (e = 0; e < nelem; ++e) {
+		calc_stress(e, strain, vars_old, stress);
+		for (i = 0; i < 6; ++i)
+			assert(fabs(stress[i] - stress_exact[i]) < 1.0e-5);
+	}
+
 
 	microc_finish();
 

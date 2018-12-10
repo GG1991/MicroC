@@ -72,7 +72,16 @@ int microc_init(const int _ngp, const int _size[3], const int _type,
 
 	int npe;
 	ierr = DMDAGetElements(da, &nelem, &npe, &eix); CHKERRQ(ierr);
+	ierr = DMDAGetElementsSizes(da, &nex, &ney, &nez); CHKERRQ(ierr);
 	assert(npe == NPE);
+
+	int ex, ey, ez;
+	elem_type = malloc(nelem * sizeof(int));
+	for (ex = 0; ex < nex; ++ex)
+		for (ey = 0; ey < ney; ++ey)
+			for (ez = 0; ez < nez; ++ez)
+				elem_type[elm_index(ex,ey,ez)] =  get_elem_type(ex, ey, ez);
+
 
 	PetscInt M, N, P;
 	ierr = DMDAGetInfo(da, 0, &M, &N, &P, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -106,7 +115,6 @@ int microc_init(const int _ngp, const int _size[3], const int _type,
 	printf("KSP Info: type = %s\trtol = %e\tabstol = %e\tdtol = %e\tmaxits = %d\n",
 	       ksptype, rtol, abstol, dtol, maxits);
 
-	ierr = DMDAGetElementsSizes(da, &nex, &ney, &nez); CHKERRQ(ierr);
 
 	// Init <struct gp_t> list
 	ngp = _ngp;
