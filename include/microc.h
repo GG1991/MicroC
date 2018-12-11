@@ -33,6 +33,17 @@
 #include "gp.h"
 #include "material.h"
 
+#ifdef TIMER
+#include "instrument.h"
+#define MICROC_INST_START INST_START
+#define MICROC_INST_END   INST_END
+#define MICROC_INST_PRINT INST_PRINT
+#else
+#define MICROC_INST_START
+#define MICROC_INST_END
+#define MICROC_INST_PRINT
+#endif
+
 #define nod_index(i,j,k)     ((k) * nx * ny + (j) * nx + (i))
 #define elm_index(ex,ey,ez)  ((ez) * nex * ney + (ey) * nex + (ex))
 

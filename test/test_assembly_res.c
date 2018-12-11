@@ -44,5 +44,7 @@ int main(void)
 
 	microc_finish();
 
+	MICROC_INST_PRINT
+
 	return 0;
 }

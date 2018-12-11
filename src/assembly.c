@@ -87,6 +87,8 @@ void get_elem_mat_with_ie(const int ie, const double *u_arr, const double *vars_
 
 double assembly_res(Vec b, Vec u, const double *vars_old)
 {
+	MICROC_INST_START
+
 	int ierr;
 	int i, ie, n, d;
 	int ix[NPE * DIM];
@@ -127,12 +129,16 @@ double assembly_res(Vec b, Vec u, const double *vars_old)
 	double norm;
 	VecNorm(b, NORM_2, &norm);
 
+	MICROC_INST_END
+
 	return norm;
 }
 
 
 int assembly_jac(Mat A, Vec u, const double *vars_old)
 {
+	MICROC_INST_START
+
 	int ierr;
 	int ie, n, d;
 	int ix[NPE * DIM];
@@ -162,6 +168,8 @@ int assembly_jac(Mat A, Vec u, const double *vars_old)
 	ierr = MatZeroRowsColumns(A, nbcs, bc_index, 1.0, NULL, NULL); CHKERRQ(ierr);
 	ierr = VecRestoreArray(u, &u_arr); CHKERRQ(ierr);
 	//MatView(A, PETSC_VIEWER_DRAW_WORLD);
+
+	MICROC_INST_END
 
 	return ierr;
 }

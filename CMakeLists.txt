@@ -29,6 +29,9 @@ option(FILTER "Enable Filtering on Average Stress and Ctan" OFF)
 
 if (TIMER)
 	add_definitions(-DTIMER)
+
+	find_path(INSTRUMENT_INC instrument.h PATHS ~/GIT/Instrument PATH_SUFFIXES "include")
+	find_library(INSTRUMENT_LIB instrument PATHS ~/GIT/Instrument PATH_SUFFIXES "build")
 endif()
 
 if (CGDEBUG)
@@ -40,13 +43,13 @@ if (FILTER)
 endif()
 
 # Include Directories (for all targets)
-include_directories(include ${CMAKE_BINARY_DIR} ${MICROC_INC} ${PETSC_INC})
+include_directories(include ${CMAKE_BINARY_DIR} ${MICROC_INC} ${PETSC_INC} ${INSTRUMENT_INC})
 
 # wildcard all the sources in src
 file(GLOB SOURCESLIB src/*.c)
 
 add_library(microc ${SOURCESLIB})
-target_link_libraries(microc ${PETSC_LIB} m)
+target_link_libraries(microc ${PETSC_LIB} ${INSTRUMENT_LIB} m)
 
 enable_testing()
 add_subdirectory(test)
