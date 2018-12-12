@@ -11,6 +11,7 @@ set(testsources
 	test_newton_raphson.c
 	test_calc_stress.c
 	test_calc_strain.c
+	test_solver_linear.c
 	)
 
 # Iterate over the list above
@@ -35,3 +36,4 @@ add_test(NAME test_assembly_jac COMMAND test_assembly_jac)
 add_test(NAME test_newton_raphson COMMAND test_newton_raphson)
 add_test(NAME test_calc_stress COMMAND test_calc_stress)
 add_test(NAME test_calc_strain COMMAND test_calc_strain)
+add_test(NAME test_solver_linear COMMAND test_solver_linear)
