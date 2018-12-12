@@ -21,6 +21,10 @@
 
 #include "microc.h"
 
+
+#define REPETITIONS 10
+
+
 int main(void)
 {
 	int ierr;
@@ -37,10 +41,13 @@ int main(void)
 
 	const double strain[6] = { 1., 2., 3., 1., 1., 1. };
 
-	ierr = VecZeroEntries(u);
-
-	ierr = bc_apply_on_u(u, strain);
-	double norm = assembly_res(b, u, NULL);
+	int i;
+	for (i = 0; i < REPETITIONS; ++i) {
+		ierr = VecZeroEntries(u);
+		ierr = bc_apply_on_u(u, strain);
+		double norm = assembly_res(b, u, NULL);
+		printf("|res| = %lf\n", norm);
+	}
 
 	microc_finish();
 
