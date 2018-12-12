@@ -33,6 +33,7 @@ int microc_initv(const int _ngp, const int _size[3], const int _type,
 		const double *_params, const material_t *_materials,
 		int argc, char **argv)
 {
+	MICROC_INST_START
 
 	int ierr;
 	if (!first_init) {
@@ -107,8 +108,6 @@ int microc_initv(const int _ngp, const int _size[3], const int _type,
 	dz = lz / (P - 1);
 	wg = dx * dy * dz / NPE;
 
-	solver = PETSC_CG;
-
 	KSPType ksptype;
 	PetscReal rtol, abstol, dtol;
 	PetscInt maxits;
@@ -116,8 +115,8 @@ int microc_initv(const int _ngp, const int _size[3], const int _type,
 	ierr = KSPCreate(PETSC_COMM_WORLD, &ksp); CHKERRQ(ierr);
 	ierr = KSPSetType(ksp, KSPCG); CHKERRQ(ierr);
 	ierr = KSPGetPC(ksp, &pc); CHKERRQ(ierr);
-	ierr = KSPSetFromOptions(ksp); CHKERRQ(ierr);
 	ierr = PCSetType(pc, PCJACOBI); CHKERRQ(ierr);
+	ierr = KSPSetFromOptions(ksp); CHKERRQ(ierr);
 
 
 	// Init <struct gp_t> list
@@ -195,6 +194,7 @@ int microc_initv(const int _ngp, const int _size[3], const int _type,
 	ierr = VecZeroEntries(u);
 	ierr = assembly_jac(A0, u, NULL);
 
+	MICROC_INST_END
 	return ierr;
 }
 

@@ -20,8 +20,12 @@
 
 #include "microc.h"
 
-void get_elem_rhs_with_ie(const int ie, const double *u_arr, const double *vars_old, double be[NPE * DIM])
+void get_elem_rhs_with_ie(const int ie, const double *u_arr,
+			  const double *vars_old,
+			  double be[NPE * DIM])
 {
+	MICROC_INST_START;
+
 	double stress[NVOI], strain[NVOI];
 	double B[NVOI][NPE * DIM];
 	double u_e[NPE * DIM];
@@ -42,11 +46,18 @@ void get_elem_rhs_with_ie(const int ie, const double *u_arr, const double *vars_
 			for (int j = 0; j < NVOI; ++j)
 				be[i] += B[j][i] * stress[j] * wg;
 	}
+
+	MICROC_INST_END;
+	return;
 }
 
 
-void get_elem_mat_with_ie(const int ie, const double *u_arr, const double *vars_old, double Ae[NPE * DIM * NPE * DIM])
+void get_elem_mat_with_ie(const int ie, const double *u_arr,
+			  const double *vars_old,
+			  double Ae[NPE * DIM * NPE * DIM])
 {
+	MICROC_INST_START;
+
 	int i, j, k, m;
 	double strain[NVOI], ctan[NVOI][NVOI];
 	double B[NVOI][NPE * DIM];
@@ -82,6 +93,8 @@ void get_elem_mat_with_ie(const int ie, const double *u_arr, const double *vars_
 			}
 		}
 	}
+
+	MICROC_INST_END;
 }
 
 

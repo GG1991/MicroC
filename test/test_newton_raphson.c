@@ -21,8 +21,16 @@
 
 #include "microc.h"
 
+
+#define REPETITIONS 5
+
+const double strain[6] = { 1., 2., 3., 1., 1., 1. };
+
+
 int main(void)
 {
+	MICROC_INST_START
+
 	int ierr;
 	int size[3] = { 10, 10, 10 };
 	int ngp = 100;
@@ -35,15 +43,16 @@ int main(void)
 
 	ierr = microc_init(ngp, size, type, params, materials);
 
-	const double strain[6] = { 1., 2., 3., 1., 1., 1. };
-
-	ierr = VecZeroEntries(u);
-
-	newton_t newton;
-	newton_raphson(false, strain, NULL, u, &newton);
+	int i;
+	for (i = 0; i < REPETITIONS; ++i) {
+		VecZeroEntries(u);
+		newton_t newton;
+		newton_raphson_v(false, strain, NULL, u, PCJACOBI, KSPCG, &newton);
+	}
 
 	microc_finish();
 
+	MICROC_INST_END
 	MICROC_INST_PRINT
 
 	return 0;

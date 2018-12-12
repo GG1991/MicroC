@@ -22,40 +22,56 @@
 #include "microc.h"
 
 
-int solve(Mat A, Vec b, Vec x, double *_err)
+int solve(Mat _A, Vec _b, Vec _x, int *_its, double *_err)
 {
-	int ierr;
-	int its = -1;
-	double norm = -1;
-			PetscViewer viewer;
+	return solve_v(_A, _b, _x, PCJACOBI, KSPCG, _its, _err);
+}
 
-	switch (solver) {
-		case PETSC_CG:
 
-			ierr = KSPSetOperators(ksp, A, A); CHKERRQ(ierr);
-			ierr = KSPSetUp(ksp); CHKERRQ(ierr);
+int solve_v(Mat _A, Vec _b, Vec _x, PCType _PC, KSPType _KSP,
+	  int *_its, double *_err)
+{
+	INST_START
 
-			ierr = KSPSolve(ksp, b, x); CHKERRQ(ierr);
+	int ierr, its;
+	double norm;
 
-			ierr = KSPGetIterationNumber(ksp, &its);
-			ierr = KSPGetResidualNorm(ksp, &norm);
-			break;
+	ierr = KSPSetOperators(ksp, _A, _A); CHKERRQ(ierr);
+	ierr = KSPSetType(ksp, _KSP); CHKERRQ(ierr);
+	ierr = PCSetType(pc, _PC); CHKERRQ(ierr);
+	ierr = KSPSetUp(ksp); CHKERRQ(ierr);
 
-		case (CGPD):
-			// MicroC solver implementation of the CG with
-			// Diagonal Preconditioner
-			break;
-		default:
-			ierr = 1;
-			break;
-	}
+	ierr = KSPSolve(ksp, _b, _x); CHKERRQ(ierr);
+
+	ierr = KSPGetIterationNumber(ksp, &its);
+	ierr = KSPGetResidualNorm(ksp, &norm);
 	printf("KSP : |Ax - b|/|Ax| = %e\tIts = %d\n", norm, its);
+
+	*_err = norm;
+	*_its = its;
+
+	INST_END
 	return its;
 }
 
 
-int newton_raphson(const bool non_linear, const double strain[NVOI], const double *vars_old, Vec u, newton_t *newton)
+int newton_raphson(const bool non_linear, const double strain[NVOI],
+		   const double *vars_old, Vec u,
+		   newton_t *newton)
 {
+	return newton_raphson_v(non_linear, strain, vars_old, u,
+				PCJACOBI, KSPCG,
+				newton);
+}
+
+
+int newton_raphson_v(const bool non_linear, const double strain[NVOI],
+		     const double *vars_old, Vec u,
+		     PCType _PC, KSPType _KSP,
+		     newton_t *newton)
+{
+	MICROC_INST_START
+
 	bc_apply_on_u(u, strain);
 
 	int ierr, lits = 0;
@@ -75,6 +91,8 @@ int newton_raphson(const bool non_linear, const double strain[NVOI], const doubl
 			lerr0 = lerr;
 
 		newton->err[lits] = lerr;
+		printf("|b| = %e\n", lerr);
+
 
 		if (lerr < NEWTON_MIN_TOL || lerr < lerr0 * NEWTON_REL_TOL)
 			break;
@@ -82,11 +100,11 @@ int newton_raphson(const bool non_linear, const double strain[NVOI], const doubl
 		if (non_linear || lits > 0) {
 
 			assembly_jac(A, u, vars_old);
-			solver_its = solve(A, b, du, &solver_err);
+			solve_v(A, b, du, _PC, _KSP, &solver_its, &solver_err);
 
 		} else {
 
-			solver_its = solve(A0, b, du, &solver_err);
+			solve_v(A0, b, du, _PC, _KSP, &solver_its, &solver_err);
 
 		}
 
@@ -99,6 +117,7 @@ int newton_raphson(const bool non_linear, const double strain[NVOI], const doubl
 
 	}
 
+	MICROC_INST_END
 	return lits;
 }
 

@@ -80,12 +80,6 @@ enum {
        	MIC_QUAD_FIB_XZ_BROKEN_X
 };
 
-enum {
-	PETSC_CG,
-	PETSC_GMRES,
-	CGPD,
-	CGPD_DEFLATED
-};
 
 #define CONSTXG        0.577350269189626
 
@@ -102,7 +96,6 @@ static double xg[8][3] = {
 static char help[] = "FE code to solve macroscopic problems with PETSc.\n";
 
 int first_init; // variable to know if init was called
-int solver;
 
 double lx, ly, lz, dx, dy, dz;
 double wg;
@@ -137,41 +130,78 @@ Mat A, A0;
 Vec u, du, b;
 
 // init.c
+
 int microc_init(const int _ngp, const int _size[3], const int _type,
 		const double *_params, const material_t *_materials);
+
 int microc_initv(const int _ngp, const int _size[3], const int _micro_type,
 		 const double *_micro_params, const material_t *_material,
 		 int _argc, char **_argv);
+
 int microc_finish(void);
 
 // homogenize.c
+
 void microc_set_macro_strain(const int gp_id, const double *macro_strain);
+
 void microc_get_macro_strain(const int gp_id, double *macro_strain);
+
 void microc_get_macro_stress(const int gp_id, double *macro_stress);
+
 void microc_get_macro_ctan(const int gp_id, double *macro_ctan);
+
 void microc_homogenize();
 
 //general.c
-void calc_strain(const double u_e[NPE * DIM], const double B[NVOI][NPE * DIM], double strain[6]);
-void calc_stress(const int ie, const double strain[NVOI], const double *vars_old, double stress[NVOI]);
-void calc_ctan(const int ie, const double strain[NVOI], const double *vars_old, double ctan[NVOI][NVOI]);
+
+void calc_strain(const double u_e[NPE * DIM], const double B[NVOI][NPE * DIM],
+		 double strain[6]);
+
+void calc_stress(const int ie, const double strain[NVOI],
+		 const double *vars_old, double stress[NVOI]);
+
+void calc_ctan(const int ie, const double strain[NVOI], const double *vars_old,
+	       double ctan[NVOI][NVOI]);
+
 void calc_B(int gp, double B[NVOI][NPE * DIM]);
+
 int get_elem_type(const int ex, const int ey, const int ez);
+
 material_t *get_material(const int ie);
-void calc_elemental_displacements_with_ie(const int ie, const double *u_global, double u_e[NPE * DIM]);
+
+void calc_elemental_displacements_with_ie(const int ie, const double *u_global,
+					  double u_e[NPE * DIM]);
 
 // assembly.c
-void get_elem_rhs_with_ie(const int ie, const double *u, const double *varsold, double be[NPE * DIM]);
-void get_elem_mat_with_ie(const int ie, const double *u_global, const double *varsold, double be[NPE * DIM]);
+void get_elem_rhs_with_ie(const int ie, const double *u, const double *varsold,
+			  double be[NPE * DIM]);
+
+void get_elem_mat_with_ie(const int ie, const double *u_global,
+			  const double *varsold, double be[NPE * DIM]);
+
 double assembly_res(Vec b, Vec u, const double *vars_old);
+
 int assembly_jac(Mat A, Vec u, const double *vars_old);
 
 // bcs.c
-void mat_vec(const double strain_mat[3][3], const double coor[3], double disp[3]);
+
+void mat_vec(const double strain_mat[3][3], const double coor[3],
+	     double disp[3]);
+
 int bc_apply_on_u(Vec u, const double strain[NVOI]);
 
 // solve.c
-int solve(Mat A, Vec b, Vec x, double *_err);
-int newton_raphson(const bool non_linear, const double strain[NVOI], const double *vars_old, Vec u, newton_t *newton);
+
+int solve(Mat A, Vec b, Vec x, int *_its, double *_err);
+
+int solve_v(Mat _A, Vec _b, Vec _x, PCType _PC, KSPType _KSP, int *_its, double *_err);
+
+int newton_raphson(const bool non_linear, const double strain[NVOI],
+		   const double *vars_old, Vec u, newton_t *newton);
+
+int newton_raphson_v(const bool non_linear, const double strain[NVOI],
+		   const double *vars_old, Vec u,
+		   PCType _PC, KSPType _KSP,
+		   newton_t *newton);
 
 #endif
