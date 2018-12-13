@@ -46,7 +46,6 @@ int solve_v(Mat _A, Vec _b, Vec _x, PCType _PC, KSPType _KSP,
 
 	ierr = KSPGetIterationNumber(ksp, &its);
 	ierr = KSPGetResidualNorm(ksp, &norm);
-	printf("KSP : |Ax - b|/|Ax| = %e\tIts = %d\n", norm, its);
 
 	*_err = norm;
 	*_its = its;

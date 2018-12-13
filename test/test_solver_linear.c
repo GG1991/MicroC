@@ -36,8 +36,9 @@ void SOLVER_0(void)
 	err = assembly_res(b, u, NULL);
 	printf("|NR err| = %lf\n", err);
 	MICROC_INST_START
+	printf("SOLVER_START\n");
 	solve(A0, b, du, &its, &err);
-	printf("|Solver err| = %lf Solver = %d\n", err, its);
+	printf("SOLVER_END\n");
 	MICROC_INST_END
 	VecAXPY(u, 1., du);
 	err = assembly_res(b, u, NULL);
@@ -54,8 +55,9 @@ void SOLVER(void)
 	err = assembly_res(b, u, NULL);
 	printf("|NR err| = %lf\n", err);
 	MICROC_INST_START
+	printf("SOLVER_START\n");
 	solve(A0, b, du, &its, &err);
-	printf("|Solver err| = %lf Solver = %d\n", err, its);
+	printf("SOLVER_END\n");
 	MICROC_INST_END
 	VecAXPY(u, 1., du);
 	err = assembly_res(b, u, NULL);
