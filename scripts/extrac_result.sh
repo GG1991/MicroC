@@ -1,7 +1,6 @@
 #!/bin/bash
 
-petsc_pc=( "jacobi" "ilu" "mg" "sor" "gasm" )
-sizes=( 10 15 20 25 30 35 40 45 50 )
+source vars.sh
 
 mkdir -p result
 
