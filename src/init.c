@@ -203,13 +203,24 @@ int microc_finish(void)
 {
 	int ierr;
 	ierr = MatDestroy(&A); CHKERRQ(ierr);
+	ierr = MatDestroy(&A0); CHKERRQ(ierr);
 	ierr = VecDestroy(&u); CHKERRQ(ierr);
 	ierr = VecDestroy(&b); CHKERRQ(ierr);
 	ierr = VecDestroy(&du); CHKERRQ(ierr);
 	ierr = KSPDestroy(&ksp); CHKERRQ(ierr);
+	ierr = DMDestroy(&da); CHKERRQ(ierr);
 
 	free(bc_index);
 	free(bc_value);
+
+
+	int gp;
+	for (gp = 0; gp < ngp; ++gp) {
+		free(gp_list[gp].u_n);
+		free(gp_list[gp].u_k);
+	}
+	free(gp_list);
+	free(elem_type);
 
 	ierr = PetscFinalize(); CHKERRQ(ierr);
 	return ierr;
