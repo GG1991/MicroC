@@ -39,6 +39,7 @@ int solve_v(Mat _A, Vec _b, Vec _x, PCType _PC, KSPType _KSP,
 	ierr = KSPSetOperators(ksp, _A, _A); CHKERRQ(ierr);
 	ierr = KSPSetType(ksp, _KSP); CHKERRQ(ierr);
 	ierr = PCSetType(pc, _PC); CHKERRQ(ierr);
+	ierr = KSPSetFromOptions(ksp); CHKERRQ(ierr);
 	ierr = KSPSetUp(ksp); CHKERRQ(ierr);
 
 	ierr = KSPSolve(ksp, _b, _x); CHKERRQ(ierr);

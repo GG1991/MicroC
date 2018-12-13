@@ -43,7 +43,7 @@ int microc_initv(const int _ngp, const int _size[3], const int _type,
 		first_init = 1;
 	}
 
-	ierr = PetscInitialize(NULL, NULL, (char*)0, help);
+	ierr = PetscInitialize(&argc, &argv, (char*)0, help);
 
 	if(ierr)
 		return ierr;
@@ -116,7 +116,6 @@ int microc_initv(const int _ngp, const int _size[3], const int _type,
 	ierr = KSPSetType(ksp, KSPCG); CHKERRQ(ierr);
 	ierr = KSPGetPC(ksp, &pc); CHKERRQ(ierr);
 	ierr = PCSetType(pc, PCJACOBI); CHKERRQ(ierr);
-	ierr = KSPSetFromOptions(ksp); CHKERRQ(ierr);
 
 
 	// Init <struct gp_t> list
