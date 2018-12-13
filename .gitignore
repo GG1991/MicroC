@@ -1,4 +1,5 @@
 *.dat
+*.txt
 *.out*
 *.err
 *.aux
