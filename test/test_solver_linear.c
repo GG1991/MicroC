@@ -26,8 +26,7 @@
 
 const double strain[6] = { 1., 2., 3., 1., 1., 1. };
 
-
-void CG_JACOBI(void)
+void SOLVER_0(void)
 {
 
 	double err;
@@ -35,33 +34,69 @@ void CG_JACOBI(void)
 	VecZeroEntries(u);
 	bc_apply_on_u(u, strain);
 	err = assembly_res(b, u, NULL);
+	printf("|NR err| = %lf\n", err);
 	MICROC_INST_START
-	solve_v(A0, b, du, PCJACOBI, KSPCG, &its, &err);
+	solve(A0, b, du, &its, &err);
+	printf("|Solver err| = %lf Solver = %d\n", err, its);
 	MICROC_INST_END
 	VecAXPY(u, 1., du);
 	err = assembly_res(b, u, NULL);
+	printf("|NR err| = %lf\n", err);
+}
+
+void SOLVER(void)
+{
+
+	double err;
+	int its;
+	VecZeroEntries(u);
+	bc_apply_on_u(u, strain);
+	err = assembly_res(b, u, NULL);
+	printf("|NR err| = %lf\n", err);
+	MICROC_INST_START
+	solve(A0, b, du, &its, &err);
+	printf("|Solver err| = %lf Solver = %d\n", err, its);
+	MICROC_INST_END
+	VecAXPY(u, 1., du);
+	err = assembly_res(b, u, NULL);
+	printf("|NR err| = %lf\n", err);
 }
 
 
-int main(void)
+int main(int argc, char **argv)
 {
-	MICROC_INST_START
-
 	int ierr;
-	int size[3] = { 10, 10, 10 };
-	int ngp = 100;
+	int ngp = 1;
 	int type = 2;
 	double params[1] = { 0.2 };
+	if (argc <= 1) {
+		printf("Usage: %s <n>", argv[0]);
+		return 1;
+	}
+	int n = atoi(argv[1]);
+	int size[3] = { n, n, n };
+
+	MICROC_INST_START
 
 	material_t materials[NMATERIALS];
 	material_set(&materials[0], 1.0e8, 0.25, 1.0e8, 1.0e4, 0);
 	material_set(&materials[1], 1.0e8, 0.25, 1.0e8, 1.0e4, 0);
 
-	ierr = microc_init(ngp, size, type, params, materials);
+	microc_initv(ngp, size, type, params, materials, argc, argv);
 
-	CG_JACOBI();
+	SOLVER_0();
+
+	int i;
+	for (i = 0; i < REPETITIONS; ++i)
+		SOLVER();
+
+	double total = get_total_time(7);
+	int calls = get_total_calls(7);
+
+	printf("\nn = %d\t mean = %lf\n", n * n * n, total / calls);
 
 	microc_finish();
+
 
 	MICROC_INST_END
 	MICROC_INST_PRINT
