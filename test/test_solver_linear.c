@@ -26,7 +26,7 @@
 
 const double strain[6] = { 1., 2., 3., 1., 1., 1. };
 
-void SOLVER_0(void)
+int SOLVER_0(void)
 {
 
 	double err;
@@ -43,9 +43,10 @@ void SOLVER_0(void)
 	VecAXPY(u, 1., du);
 	err = assembly_res(b, u, NULL);
 	printf("|NR err| = %lf\n", err);
+	return its;
 }
 
-void SOLVER(void)
+int SOLVER(void)
 {
 
 	double err;
@@ -62,6 +63,7 @@ void SOLVER(void)
 	VecAXPY(u, 1., du);
 	err = assembly_res(b, u, NULL);
 	printf("|NR err| = %lf\n", err);
+	return its;
 }
 
 
@@ -86,16 +88,16 @@ int main(int argc, char **argv)
 
 	microc_initv(ngp, size, type, params, materials, argc, argv);
 
-	SOLVER_0();
+	int its = SOLVER_0();
 
 	int i;
 	for (i = 0; i < REPETITIONS; ++i)
-		SOLVER();
+		its = SOLVER();
 
 	double total = get_total_time(7);
 	int calls = get_total_calls(7);
 
-	printf("\nn = %d\t mean = %lf\n", n * n * n, total / calls);
+	printf("\nn = %d\t mean = %lf\t iter = %d\n", n * n * n, total / calls, its);
 
 	microc_finish();
 
