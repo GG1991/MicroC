@@ -31,7 +31,7 @@ int solve(Mat _A, Vec _b, Vec _x, int *_its, double *_err)
 int solve_v(Mat _A, Vec _b, Vec _x, PCType _PC, KSPType _KSP,
 	  int *_its, double *_err)
 {
-	INST_START
+	MICROC_INST_START
 
 	int ierr, its;
 	double norm;
@@ -50,7 +50,7 @@ int solve_v(Mat _A, Vec _b, Vec _x, PCType _PC, KSPType _KSP,
 	*_err = norm;
 	*_its = its;
 
-	INST_END
+	MICROC_INST_END
 	return its;
 }
 
