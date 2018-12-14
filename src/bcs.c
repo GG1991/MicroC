@@ -49,7 +49,7 @@ int bc_apply_on_u(Vec u, const double strain[6])
 	/* Y = 0 */
 	for (i = 0; i < nx; ++i) {
 		for (k = 0; k < nz; ++k) {
-			const double coor[3] = { i * dx, 0 * dy, k * dz };
+			const double coor[3] = { i * dx, 0, k * dz };
 			mat_vec(strain_mat, coor, disp);
 			for (d = 0; d < DIM; ++d)
 				bc_value[count++] = disp[d];
@@ -59,7 +59,7 @@ int bc_apply_on_u(Vec u, const double strain[6])
 	/* Y = LY */
 	for (i = 0; i < nx; ++i) {
 		for (k = 0; k < nz; ++k) {
-			const double coor[3] = { i * dx, (ny - 1) * dy, k * dz };
+			const double coor[3] = { i * dx, LY, k * dz };
 			mat_vec(strain_mat, coor, disp);
 			for (d = 0; d < DIM; ++d)
 				bc_value[count++] = disp[d];
@@ -69,7 +69,7 @@ int bc_apply_on_u(Vec u, const double strain[6])
 	/* Z = 0 */
 	for (i = 0; i < nx; ++i) {
 		for (j = 0; j < ny; ++j) {
-			const double coor[3] = { i * dx, j * dy, 0 * dz };
+			const double coor[3] = { i * dx, j * dy, 0 };
 			mat_vec(strain_mat, coor, disp);
 			for (d = 0; d < DIM; ++d)
 				bc_value[count++] = disp[d];
@@ -78,8 +78,8 @@ int bc_apply_on_u(Vec u, const double strain[6])
 
 	/* Z = LZ */
 	for (i = 0; i < nx; ++i) {
-		for (k = 0; k < ny; ++k) {
-			const double coor[3] = { i * dx, j * dy, (nz - 1) * dz };
+		for (j = 0; j < ny; ++j) {
+			const double coor[3] = { i * dx, j * dy, LZ };
 			mat_vec(strain_mat, coor, disp);
 			for (d = 0; d < DIM; ++d)
 				bc_value[count++] = disp[d];
@@ -89,7 +89,7 @@ int bc_apply_on_u(Vec u, const double strain[6])
 	/* X = 0 */
 	for (j = 0; j < ny; ++j) {
 		for (k = 0; k < nz; ++k) {
-			const double coor[3] = { 0 * dx, j * dy, k * dz };
+			const double coor[3] = { 0, j * dy, k * dz };
 			mat_vec(strain_mat, coor, disp);
 			for (d = 0; d < DIM; ++d)
 				bc_value[count++] = disp[d];
@@ -99,7 +99,7 @@ int bc_apply_on_u(Vec u, const double strain[6])
 	/* X = LX */
 	for (j = 0; j < ny; ++j) {
 		for (k = 0; k < nz; ++k) {
-			const double coor[3] = { (nx - 1) * dx, j * dy, k * dz };
+			const double coor[3] = { LX, j * dy, k * dz };
 			mat_vec(strain_mat, coor, disp);
 			for (d = 0; d < DIM; ++d)
 				bc_value[count++] = disp[d];

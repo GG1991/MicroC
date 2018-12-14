@@ -108,8 +108,6 @@ double assembly_res(Vec b, Vec u, const double *vars_old)
 	double be[NPE * DIM * NPE * DIM];
 	double *u_arr, *b_arr;
 
-	Vec u_loc;
-
 	ierr = VecZeroEntries(b); CHKERRQ(ierr);
 
 	ierr = VecGetArray(b, &b_arr);CHKERRQ(ierr);
