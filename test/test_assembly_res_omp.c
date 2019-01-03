@@ -28,7 +28,7 @@
 int main(void)
 {
 	int ierr;
-	int size[3] = { 3, 3, 3 };
+	int size[3] = { 50, 50, 50 };
 	int ngp = 100;
 	int type = 2;
 	double params[1] = { 0.2 };
@@ -42,6 +42,8 @@ int main(void)
 	const double strain[6] = { 1., 2., 3., 1., 1., 1. };
 
 	int i;
+	double time = omp_get_wtime();
+
 #pragma omp parallel for
 	for (i = 0; i < REPETITIONS; ++i) {
 		int thread_id = omp_get_thread_num();
@@ -50,8 +52,11 @@ int main(void)
 		double norm = assembly_res(b[thread_id], u[thread_id], NULL);
 		printf("Thread : %d |res| = %lf\n", thread_id, norm);
 	}
+	time = omp_get_wtime() - time;
 
 	microc_finish();
+
+	printf("time = %lf\n", time);
 
 	return 0;
 }
