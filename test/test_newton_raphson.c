@@ -47,7 +47,7 @@ int main(void)
 	for (i = 0; i < REPETITIONS; ++i) {
 		VecZeroEntries(u);
 		newton_t newton;
-		newton_raphson_v(false, strain, NULL, u, PCJACOBI, KSPCG, &newton);
+		newton_raphson_v(A, A0, b, u, du, false, strain, NULL, PCJACOBI, KSPCG, &newton);
 	}
 
 	microc_finish();
