@@ -8,6 +8,7 @@ set(testsources
 	test_bc_apply_on_u.c
 	test_bc_apply_on_u_omp.c
 	test_assembly_res.c
+	test_assembly_res_omp.c
 	test_assembly_jac.c
 	test_newton_raphson.c
 	test_newton_raphson_omp.c
