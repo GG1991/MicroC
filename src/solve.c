@@ -55,24 +55,30 @@ int solve_v(Mat _A, Vec _b, Vec _x, PCType _PC, KSPType _KSP,
 }
 
 
-int newton_raphson(const bool non_linear, const double strain[NVOI],
-		   const double *vars_old, Vec u,
-		   newton_t *newton)
-{
-	return newton_raphson_v(non_linear, strain, vars_old, u,
-				PCJACOBI, KSPCG,
-				newton);
-}
+//int newton_raphson(const bool non_linear, const double strain[NVOI],
+//		   const double *vars_old, Vec u,
+//		   newton_t *newton)
+//{
+//	return newton_raphson_v(non_linear, strain, vars_old, u,
+//				PCJACOBI, KSPCG,
+//				newton);
+//}
 
 
-int newton_raphson_v(const bool non_linear, const double strain[NVOI],
-		     const double *vars_old, Vec u,
+int newton_raphson_v(Mat _A,
+		     Mat _A0,
+		     Vec _b,
+		     Vec _u,
+		     Vec _du,
+		     const bool non_linear,
+		     const double strain[NVOI],
+		     const double *_vars_old,
 		     PCType _PC, KSPType _KSP,
 		     newton_t *newton)
 {
 	MICROC_INST_START
 
-	bc_apply_on_u(u, strain);
+	bc_apply_on_u(_u, strain);
 
 	int ierr, lits = 0;
 	double lerr, lerr0;
@@ -85,7 +91,7 @@ int newton_raphson_v(const bool non_linear, const double strain[NVOI],
 
 	while (lits < NEWTON_MAX_ITS) {
 
-		lerr = assembly_res(b, u, vars_old);
+		lerr = assembly_res(_b, _u, _vars_old);
 
 		if (lits == 0)
 			lerr0 = lerr;
@@ -99,19 +105,19 @@ int newton_raphson_v(const bool non_linear, const double strain[NVOI],
 
 		if (non_linear || lits > 0) {
 
-			assembly_jac(A, u, vars_old);
-			solve_v(A, b, du, _PC, _KSP, &solver_its, &solver_err);
+			assembly_jac(_A, _u, _vars_old);
+			solve_v(_A, _b, _du, _PC, _KSP, &solver_its, &solver_err);
 
 		} else {
 
-			solve_v(A0, b, du, _PC, _KSP, &solver_its, &solver_err);
+			solve_v(_A0, _b, _du, _PC, _KSP, &solver_its, &solver_err);
 
 		}
 
 		newton->solver_its[lits] = solver_its;
 		newton->solver_err[lits] = solver_err;
 
-		ierr = VecAXPY(u, 1., du); CHKERRQ(ierr);
+		ierr = VecAXPY(_u, 1., _du); CHKERRQ(ierr);
 
 		lits++;
 

@@ -21,10 +21,18 @@
 
 #include "microc.h"
 
+
+#define REPETITIONS 5
+
+const double strain[6] = { 1., 2., 3., 1., 1., 1. };
+
+
 int main(void)
 {
+	MICROC_INST_START
+
 	int ierr;
-	int size[3] = { 3, 3, 3 };
+	int size[3] = { 10, 10, 10 };
 	int ngp = 100;
 	int type = 2;
 	double params[1] = { 0.2 };
@@ -35,14 +43,25 @@ int main(void)
 
 	ierr = microc_init(ngp, size, type, params, materials);
 
-	const double strain[6] = { 1., 2., 3., 1., 1., 1. };
+	int i;
 
-	ierr = VecZeroEntries(u[0]);
-
-	ierr = bc_apply_on_u(u[0], strain);
-	ierr = assembly_jac(A[0], u[0], NULL);
+#pragma omp parallel for firstprivate (strain)
+	for (i = 0; i < REPETITIONS; ++i) {
+		int thread_id = omp_get_thread_num();
+		Mat _A = A[thread_id];
+		Mat _A0 = A0[thread_id];
+		Vec _b = b[thread_id];
+		Vec _u = u[thread_id];
+		Vec _du = du[thread_id];
+		VecZeroEntries(_u);
+		newton_t newton;
+		newton_raphson_v(_A, _A0, _b, _u, _du, false, strain, NULL, PCJACOBI, KSPCG, &newton);
+	}
 
 	microc_finish();
 
-	return ierr;
+	MICROC_INST_END
+	MICROC_INST_PRINT
+
+	return 0;
 }

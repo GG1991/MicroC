@@ -21,10 +21,14 @@
 
 #include "microc.h"
 
+
+#define REPETITIONS 10
+
+
 int main(void)
 {
 	int ierr;
-	int size[3] = { 3, 3, 3 };
+	int size[3] = { 50, 50, 50 };
 	int ngp = 100;
 	int type = 2;
 	double params[1] = { 0.2 };
@@ -37,12 +41,22 @@ int main(void)
 
 	const double strain[6] = { 1., 2., 3., 1., 1., 1. };
 
-	ierr = VecZeroEntries(u[0]);
+	int i;
+	double time = omp_get_wtime();
 
-	ierr = bc_apply_on_u(u[0], strain);
-	ierr = assembly_jac(A[0], u[0], NULL);
+#pragma omp parallel for
+	for (i = 0; i < REPETITIONS; ++i) {
+		int thread_id = omp_get_thread_num();
+		ierr = VecZeroEntries(u[thread_id]);
+		ierr = bc_apply_on_u(u[thread_id], strain);
+		double norm = assembly_res(b[thread_id], u[thread_id], NULL);
+		printf("Thread : %d |res| = %lf\n", thread_id, norm);
+	}
+	time = omp_get_wtime() - time;
 
 	microc_finish();
 
-	return ierr;
+	printf("time = %lf\n", time);
+
+	return 0;
 }

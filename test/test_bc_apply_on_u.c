@@ -46,16 +46,16 @@ int main(void)
 		1.00000, 2.50000, 3.50000,
 		2.00000, 3.00000, 4.00000 };
 
-	ierr = bc_apply_on_u(u, strain);
-	VecView(u, PETSC_VIEWER_STDOUT_WORLD);
+	ierr = bc_apply_on_u(u[0], strain);
+	VecView(u[0], PETSC_VIEWER_STDOUT_WORLD);
 
 	int nn = size[0] * size[1] * size[2];
 	double *u_arr;
-	ierr = VecGetArray(u, &u_arr);CHKERRQ(ierr);
+	ierr = VecGetArray(u[0], &u_arr);CHKERRQ(ierr);
 	int i;
 	for (i = 0; i < nn * DIM; ++i)
 		assert(fabs(u_arr[i] - u_exact[i]) < 1.0e-5);
-	ierr = VecRestoreArray(u, &u_arr); CHKERRQ(ierr);
+	ierr = VecRestoreArray(u[0], &u_arr); CHKERRQ(ierr);
 
 	microc_finish();
 

@@ -74,11 +74,7 @@ int microc_initv(const int _ngp, const int _size[3], const int _type,
 
 	ierr = DMSetMatType(da, MATAIJ); CHKERRQ(ierr);
 	ierr = DMSetUp(da); CHKERRQ(ierr);
-	ierr = DMCreateMatrix(da, &A); CHKERRQ(ierr);
-	ierr = DMCreateMatrix(da, &A0); CHKERRQ(ierr);
-	ierr = DMCreateGlobalVector(da, &u); CHKERRQ(ierr);
-	ierr = DMCreateGlobalVector(da, &b); CHKERRQ(ierr);
-	ierr = DMCreateGlobalVector(da, &du); CHKERRQ(ierr);
+
 
 	int npe;
 	ierr = DMDAGetElements(da, &nelem, &npe, &eix); CHKERRQ(ierr);
@@ -190,8 +186,30 @@ int microc_initv(const int _ngp, const int _size[3], const int _type,
 		}
 	}
 
-	ierr = VecZeroEntries(u);
-	ierr = assembly_jac(A0, u, NULL);
+#pragma omp parallel
+	{
+		nthread = omp_get_num_threads();
+	}
+
+	printf("Number of OMP threads : %d\n\n", nthread);
+	if (nthread <= 0)
+		return 1;
+
+        A = malloc(nthread * sizeof(Mat));
+        A0 = malloc(nthread * sizeof(Mat));
+        b = malloc(nthread * sizeof(Vec));
+        u = malloc(nthread * sizeof(Vec));
+        du = malloc(nthread * sizeof(Vec));
+
+	for (i = 0; i < nthread; ++i) {
+		ierr = DMCreateMatrix(da, &A[i]); CHKERRQ(ierr);
+		ierr = DMCreateMatrix(da, &A0[i]); CHKERRQ(ierr);
+		ierr = DMCreateGlobalVector(da, &u[i]); CHKERRQ(ierr);
+		ierr = DMCreateGlobalVector(da, &b[i]); CHKERRQ(ierr);
+		ierr = DMCreateGlobalVector(da, &du[i]); CHKERRQ(ierr);
+		ierr = VecZeroEntries(u[i]);
+		ierr = assembly_jac(A0[i], u[i], NULL);
+	}
 
 	MICROC_INST_END
 	return ierr;
@@ -200,12 +218,22 @@ int microc_initv(const int _ngp, const int _size[3], const int _type,
 
 int microc_finish(void)
 {
-	int ierr;
-	ierr = MatDestroy(&A); CHKERRQ(ierr);
-	ierr = MatDestroy(&A0); CHKERRQ(ierr);
-	ierr = VecDestroy(&u); CHKERRQ(ierr);
-	ierr = VecDestroy(&b); CHKERRQ(ierr);
-	ierr = VecDestroy(&du); CHKERRQ(ierr);
+	int i, ierr;
+
+	for (i = 0; i < nthread; ++i) {
+		ierr = MatDestroy(&A[i]); CHKERRQ(ierr);
+		ierr = MatDestroy(&A0[i]); CHKERRQ(ierr);
+		ierr = VecDestroy(&b[i]); CHKERRQ(ierr);
+		ierr = VecDestroy(&u[i]); CHKERRQ(ierr);
+		ierr = VecDestroy(&du[i]); CHKERRQ(ierr);
+	}
+
+	free(A);
+	free(A0);
+	free(b);
+	free(u);
+	free(du);
+
 	ierr = KSPDestroy(&ksp); CHKERRQ(ierr);
 	ierr = DMDestroy(&da); CHKERRQ(ierr);
 
