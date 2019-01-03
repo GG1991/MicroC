@@ -22,7 +22,7 @@
 #include "microc.h"
 
 
-#define REPETITIONS 5
+#define REPETITIONS 1
 
 const double strain[6] = { 1., 2., 3., 1., 1., 1. };
 
@@ -53,6 +53,9 @@ int SOLVER(void)
 	int its;
 	VecZeroEntries(u);
 	bc_apply_on_u(u, strain);
+
+//	VecView(u, PETSC_VIEWER_STDOUT_WORLD);
+
 	err = assembly_res(b, u, NULL);
 	printf("|NR err| = %lf\n", err);
 	MICROC_INST_START
@@ -61,6 +64,7 @@ int SOLVER(void)
 	printf("SOLVER_END\n");
 	MICROC_INST_END
 	VecAXPY(u, 1., du);
+
 	err = assembly_res(b, u, NULL);
 	printf("|NR err| = %lf\n", err);
 	return its;
@@ -74,7 +78,7 @@ int main(int argc, char **argv)
 	int type = 2;
 	double params[1] = { 0.2 };
 	if (argc <= 1) {
-		printf("Usage: %s <n>", argv[0]);
+		printf("Usage: %s <n>\n", argv[0]);
 		return 1;
 	}
 	int n = atoi(argv[1]);
@@ -88,7 +92,8 @@ int main(int argc, char **argv)
 
 	microc_initv(ngp, size, type, params, materials, argc, argv);
 
-	int its = SOLVER_0();
+	int its;
+//	its = SOLVER_0();
 
 	int i;
 	for (i = 0; i < REPETITIONS; ++i)
