@@ -191,6 +191,10 @@ int microc_initv(const int _ngp, const int _size[3], const int _type,
 		nthread = omp_get_num_threads();
 	}
 
+	printf("Number of OMP threads : %d\n\n", nthread);
+	if (nthread <= 0)
+		return 1;
+
         A = malloc(nthread * sizeof(Mat));
         A0 = malloc(nthread * sizeof(Mat));
         b = malloc(nthread * sizeof(Vec));

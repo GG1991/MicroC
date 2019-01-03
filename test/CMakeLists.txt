@@ -6,9 +6,11 @@ set(testsources
 	test_init.c
 	test_set_strain.c
 	test_bc_apply_on_u.c
+	test_bc_apply_on_u_omp.c
 	test_assembly_res.c
 	test_assembly_jac.c
 	test_newton_raphson.c
+	test_newton_raphson_omp.c
 	test_calc_stress.c
 	test_calc_strain.c
 	test_solver_linear.c
