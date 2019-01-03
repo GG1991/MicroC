@@ -78,7 +78,7 @@ int newton_raphson_v(Mat _A,
 {
 	MICROC_INST_START
 
-	bc_apply_on_u(u, strain);
+	bc_apply_on_u(_u, strain);
 
 	int ierr, lits = 0;
 	double lerr, lerr0;

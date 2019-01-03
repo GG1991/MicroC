@@ -53,11 +53,11 @@ int main(void)
 
 	int i, j, e = 0, gp = 0;
 
-	ierr = VecGetArray(u, &u_arr); CHKERRQ(ierr);
+	ierr = VecGetArray(u[0], &u_arr); CHKERRQ(ierr);
 
 	for (i = 0; i < 6; ++i) {
 
-		ierr = bc_apply_on_u(u, strain_macro[i]);
+		ierr = bc_apply_on_u(u[0], strain_macro[i]);
 		calc_elemental_displacements_with_ie(e, u_arr, u_e);
 
 		calc_B(gp, B);
@@ -66,7 +66,7 @@ int main(void)
 			assert(fabs(strain[j] - strain_macro[i][j]) < 1.0e-5);
 	}
 
-	ierr = VecRestoreArray(u, &u_arr); CHKERRQ(ierr);
+	ierr = VecRestoreArray(u[0], &u_arr); CHKERRQ(ierr);
 
 	microc_finish();
 

@@ -50,6 +50,7 @@ file(GLOB SOURCESLIB src/*.c)
 
 add_library(microc ${SOURCESLIB})
 target_link_libraries(microc ${PETSC_LIB} ${INSTRUMENT_LIB} m)
+set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -fopenmp")
 
 enable_testing()
 add_subdirectory(test)

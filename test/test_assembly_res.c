@@ -43,9 +43,9 @@ int main(void)
 
 	int i;
 	for (i = 0; i < REPETITIONS; ++i) {
-		ierr = VecZeroEntries(u);
-		ierr = bc_apply_on_u(u, strain);
-		double norm = assembly_res(b, u, NULL);
+		ierr = VecZeroEntries(u[0]);
+		ierr = bc_apply_on_u(u[0], strain);
+		double norm = assembly_res(b[0], u[0], NULL);
 		printf("|res| = %lf\n", norm);
 	}
 

@@ -37,10 +37,10 @@ int main(void)
 
 	const double strain[6] = { 1., 2., 3., 1., 1., 1. };
 
-	ierr = VecZeroEntries(u);
+	ierr = VecZeroEntries(u[0]);
 
-	ierr = bc_apply_on_u(u, strain);
-	ierr = assembly_jac(A, u, NULL);
+	ierr = bc_apply_on_u(u[0], strain);
+	ierr = assembly_jac(A[0], u[0], NULL);
 
 	microc_finish();
 

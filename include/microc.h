@@ -25,6 +25,7 @@
 #include <stdbool.h>
 #include <math.h>
 #include <assert.h>
+#include <omp.h>
 
 #include "petscksp.h"
 #include "petscdm.h"
@@ -126,8 +127,10 @@ material_t material_list[NMATERIALS];
 DM da;
 PC pc;
 KSP ksp;
-Mat A, A0;
-Vec u, du, b;
+Mat *A, *A0;
+Vec *u, *du, *b;
+
+int nthread;
 
 // init.c
 
@@ -206,7 +209,7 @@ int newton_raphson_v(Mat _A,
 		     Vec _du,
 		     const bool non_linear,
 		     const double strain[NVOI],
-		     const double *_vars_old,
+		     const double *vars_old,
 		     PCType _PC, KSPType _KSP,
 		     newton_t *newton);
 

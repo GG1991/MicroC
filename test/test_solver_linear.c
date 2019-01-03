@@ -31,17 +31,17 @@ int SOLVER_0(void)
 
 	double err;
 	int its;
-	VecZeroEntries(u);
-	bc_apply_on_u(u, strain);
-	err = assembly_res(b, u, NULL);
+	VecZeroEntries(u[0]);
+	bc_apply_on_u(u[0], strain);
+	err = assembly_res(b[0], u[0], NULL);
 	printf("|NR err| = %lf\n", err);
 	MICROC_INST_START
 	printf("SOLVER_START\n");
-	solve(A0, b, du, &its, &err);
+	solve(A0[0], b[0], du[0], &its, &err);
 	printf("SOLVER_END\n");
 	MICROC_INST_END
-	VecAXPY(u, 1., du);
-	err = assembly_res(b, u, NULL);
+	VecAXPY(u[0], 1., du[0]);
+	err = assembly_res(b[0], u[0], NULL);
 	printf("|NR err| = %lf\n", err);
 	return its;
 }
@@ -51,21 +51,21 @@ int SOLVER(void)
 
 	double err;
 	int its;
-	VecZeroEntries(u);
-	bc_apply_on_u(u, strain);
+	VecZeroEntries(u[0]);
+	bc_apply_on_u(u[0], strain);
 
-//	VecView(u, PETSC_VIEWER_STDOUT_WORLD);
+//	VecView(u[0], PETSC_VIEWER_STDOUT_WORLD);
 
-	err = assembly_res(b, u, NULL);
+	err = assembly_res(b[0], u[0], NULL);
 	printf("|NR err| = %lf\n", err);
 	MICROC_INST_START
 	printf("SOLVER_START\n");
-	solve(A0, b, du, &its, &err);
+	solve(A0[0], b[0], du[0], &its, &err);
 	printf("SOLVER_END\n");
 	MICROC_INST_END
-	VecAXPY(u, 1., du);
+	VecAXPY(u[0], 1., du[0]);
 
-	err = assembly_res(b, u, NULL);
+	err = assembly_res(b[0], u[0], NULL);
 	printf("|NR err| = %lf\n", err);
 	return its;
 }
@@ -105,7 +105,6 @@ int main(int argc, char **argv)
 	printf("\nn = %d\t mean = %lf\t iter = %d\n", n * n * n, total / calls, its);
 
 	microc_finish();
-
 
 	MICROC_INST_END
 	MICROC_INST_PRINT
