@@ -213,6 +213,7 @@ int newton_raphson_v(Mat _A,
 		     const double strain[NVOI],
 		     const double *vars_old,
 		     PCType _PC, KSPType _KSP,
-		     newton_t *newton);
+		     newton_t *newton,
+		     bool print);
 
 #endif

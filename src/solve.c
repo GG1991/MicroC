@@ -109,7 +109,8 @@ int newton_raphson_v(Mat _A,
 		     const double strain[NVOI],
 		     const double *_vars_old,
 		     PCType _PC, KSPType _KSP,
-		     newton_t *newton)
+		     newton_t *newton,
+		     bool print)
 {
 	MICROC_INST_START
 
@@ -132,8 +133,10 @@ int newton_raphson_v(Mat _A,
 			lerr0 = lerr;
 
 		newton->err[lits] = lerr;
-		printf("|b| = %e\n", lerr);
-
+		if (print) {
+			int thread_id = omp_get_thread_num();
+			printf("Thread : %d |b| = %e\n", thread_id, lerr);
+		}
 
 		if (lerr < NEWTON_MIN_TOL || lerr < lerr0 * NEWTON_REL_TOL)
 			break;
@@ -141,11 +144,11 @@ int newton_raphson_v(Mat _A,
 		if (non_linear || lits > 0) {
 
 			assembly_jac(_A, _u, _vars_old);
-			solve_v(_A, _b, _du, _PC, _KSP, &solver_its, &solver_err);
+			solve_ts(_A, _b, _du, _PC, _KSP, &solver_its, &solver_err);
 
 		} else {
 
-			solve_v(_A0, _b, _du, _PC, _KSP, &solver_its, &solver_err);
+			solve_ts(_A0, _b, _du, _PC, _KSP, &solver_its, &solver_err);
 
 		}
 
