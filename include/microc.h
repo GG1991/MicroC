@@ -198,6 +198,8 @@ int bc_apply_on_u(Vec u, const double strain[NVOI]);
 int solve(Mat A, Vec b, Vec x, int *_its, double *_err);
 
 int solve_v(Mat _A, Vec _b, Vec _x, PCType _PC, KSPType _KSP, int *_its, double *_err);
+int solve_ts(Mat _A, Vec _b, Vec _x, PCType _PC, KSPType _KSP,
+	     int *_its, double *_err);
 
 //int newton_raphson(const bool non_linear, const double strain[NVOI],
 //		   const double *vars_old, Vec u, newton_t *newton);

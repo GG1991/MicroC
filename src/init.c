@@ -186,11 +186,8 @@ int microc_initv(const int _ngp, const int _size[3], const int _type,
 		}
 	}
 
-#pragma omp parallel
-	{
-		nthread = omp_get_num_threads();
-	}
 
+	nthread = omp_get_max_threads();
 	printf("Number of OMP threads : %d\n\n", nthread);
 	if (nthread <= 0)
 		return 1;

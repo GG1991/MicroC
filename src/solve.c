@@ -29,7 +29,7 @@ int solve(Mat _A, Vec _b, Vec _x, int *_its, double *_err)
 
 
 int solve_v(Mat _A, Vec _b, Vec _x, PCType _PC, KSPType _KSP,
-	  int *_its, double *_err)
+	    int *_its, double *_err)
 {
 	MICROC_INST_START
 
@@ -40,6 +40,41 @@ int solve_v(Mat _A, Vec _b, Vec _x, PCType _PC, KSPType _KSP,
 	ierr = KSPSetType(ksp, _KSP); CHKERRQ(ierr);
 	ierr = PCSetType(pc, _PC); CHKERRQ(ierr);
 	ierr = KSPSetFromOptions(ksp); CHKERRQ(ierr);
+	ierr = KSPSetUp(ksp); CHKERRQ(ierr);
+
+	ierr = KSPSolve(ksp, _b, _x); CHKERRQ(ierr);
+
+	ierr = KSPGetIterationNumber(ksp, &its);
+	ierr = KSPGetResidualNorm(ksp, &norm);
+
+	*_err = norm;
+	*_its = its;
+
+	MICROC_INST_END
+	return its;
+}
+
+
+int solve_ts(Mat _A, Vec _b, Vec _x, PCType _PC, KSPType _KSP,
+	     int *_its, double *_err)
+{
+	/* Thread safe routine for OMP */
+
+	MICROC_INST_START
+
+	int ierr, its;
+	double norm;
+
+	KSP ksp;
+	PC pc;
+
+	ierr = KSPCreate(PETSC_COMM_WORLD, &ksp); CHKERRQ(ierr);
+	ierr = KSPGetPC(ksp, &pc); CHKERRQ(ierr);
+
+	ierr = KSPSetOperators(ksp, _A, _A); CHKERRQ(ierr);
+	ierr = KSPSetType(ksp, _KSP); CHKERRQ(ierr);
+	ierr = PCSetType(pc, _PC); CHKERRQ(ierr);
+	//ierr = KSPSetFromOptions(ksp); CHKERRQ(ierr);
 	ierr = KSPSetUp(ksp); CHKERRQ(ierr);
 
 	ierr = KSPSolve(ksp, _b, _x); CHKERRQ(ierr);
