@@ -75,20 +75,23 @@ int main(int argc, char **argv)
 {
 	int ierr;
 	int ngp = 1;
-	int type = 2;
+	int type = MIC_CILI_FIB_Z;
 	double params[1] = { 0.2 };
 	if (argc <= 1) {
-		printf("Usage: %s <n>\n", argv[0]);
+		printf("Usage: %s <n> <a>\n", argv[0]);
 		return 1;
 	}
-	int n = atoi(argv[1]);
+	const int n = (argc >= 2) ? atoi(argv[1]) : 10;
+	const double a = (argc >= 3) ? atof(argv[2]) : 1.0;
 	int size[3] = { n, n, n };
 
 	MICROC_INST_START
 
 	material_t materials[NMATERIALS];
 	material_set(&materials[0], 1.0e8, 0.25, 1.0e8, 1.0e4, 0);
-	material_set(&materials[1], 1.0e8, 0.25, 1.0e8, 1.0e4, 0);
+	material_set(&materials[1], a * 1.0e8, 0.25, 1.0e8, 1.0e4, 0);
+	material_print(&materials[0]);
+	material_print(&materials[1]);
 
 	microc_initv(ngp, size, type, params, materials, argc, argv);
 

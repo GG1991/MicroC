@@ -29,9 +29,9 @@ int microc_init(const int _ngp, const int _size[3], const int _type,
 }
 
 
-int microc_initv(const int _ngp, const int _size[3], const int _type,
-		const double *_params, const material_t *_materials,
-		int argc, char **argv)
+int microc_initv(const int _ngp, const int _size[3], const int _micro_type,
+		 const double *_params, const material_t *_materials,
+		 int argc, char **argv)
 {
 	MICROC_INST_START
 
@@ -53,6 +53,9 @@ int microc_initv(const int _ngp, const int _size[3], const int _type,
 	int m;
 	for (m = 0; m < NMATERIALS; ++m)
 		memcpy(&material_list[m], &_materials[m], sizeof(material_t));
+
+	micro_type = _micro_type;
+	special_param = _params[0];
 
 	lx = LX;
 	ly = LY;
@@ -81,28 +84,28 @@ int microc_initv(const int _ngp, const int _size[3], const int _type,
 	ierr = DMDAGetElementsSizes(da, &nex, &ney, &nez); CHKERRQ(ierr);
 	assert(npe == NPE);
 
-	int ex, ey, ez;
-	elem_type = malloc(nelem * sizeof(int));
-	for (ex = 0; ex < nex; ++ex)
-		for (ey = 0; ey < ney; ++ey)
-			for (ez = 0; ez < nez; ++ez)
-				elem_type[elm_index(ex,ey,ez)] =  get_elem_type(ex, ey, ez);
-
-
 	PetscInt M, N, P;
 	ierr = DMDAGetInfo(da, 0, &M, &N, &P, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 	nn = M * N * P;
 	nndim = nn * DIM;
 
-	printf("Number of Elements : %ld\n", nelem);
-	printf("Number of Nodes    : %ld\n", M * N * P);
-	printf("Number of DOFs     : %ld\n\n", (M * N * P) * DIM);
-
 	dx = lx / (M - 1);
 	dy = ly / (N - 1);
 	dz = lz / (P - 1);
 	wg = dx * dy * dz / NPE;
+
+	printf("Number of Elements : %ld\n", nelem);
+	printf("Number of Nodes    : %ld\n", M * N * P);
+	printf("Number of DOFs     : %ld\n\n", (M * N * P) * DIM);
+
+
+	int ex, ey, ez;
+	elem_type = malloc(nelem * sizeof(int));
+	for (ex = 0; ex < nex; ++ex)
+		for (ey = 0; ey < ney; ++ey)
+			for (ez = 0; ez < nez; ++ez)
+				elem_type[elm_index(ex,ey,ez)] =  get_elem_type(ex, ey, ez);
 
 	KSPType ksptype;
 	PetscReal rtol, abstol, dtol;

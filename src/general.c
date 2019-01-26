@@ -52,7 +52,10 @@ int get_elem_type(const int ex, const int ey, const int ez)
 		for (i = 0; i < 2; ++i)
 			tmp += (center[i] - coor[i]) * (center[i] - coor[i]);
 
-		return (tmp < rad * rad);
+		if (tmp < rad * rad)
+			return 1;
+		else
+			return 0;
 
 	} else if (micro_type == MIC_CILI_FIB_XZ) { // 2 cilindrical fibers one in x and z dirs
 
@@ -132,7 +135,8 @@ int get_elem_type(const int ex, const int ey, const int ez)
 
 material_t *get_material(const int ie)
 {
-	return &material_list[elem_type[ie]];
+	const int _elem_type = elem_type[ie];
+	return &material_list[_elem_type];
 }
 
 
