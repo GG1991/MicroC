@@ -29,7 +29,7 @@ int solve(Mat _A, Vec _b, Vec _x, int *_its, double *_err)
 
 
 int solve_v(Mat _A, Vec _b, Vec _x, PCType _PC, KSPType _KSP,
-	  int *_its, double *_err)
+	    int *_its, double *_err)
 {
 	MICROC_INST_START
 
@@ -40,6 +40,41 @@ int solve_v(Mat _A, Vec _b, Vec _x, PCType _PC, KSPType _KSP,
 	ierr = KSPSetType(ksp, _KSP); CHKERRQ(ierr);
 	ierr = PCSetType(pc, _PC); CHKERRQ(ierr);
 	ierr = KSPSetFromOptions(ksp); CHKERRQ(ierr);
+	ierr = KSPSetUp(ksp); CHKERRQ(ierr);
+
+	ierr = KSPSolve(ksp, _b, _x); CHKERRQ(ierr);
+
+	ierr = KSPGetIterationNumber(ksp, &its);
+	ierr = KSPGetResidualNorm(ksp, &norm);
+
+	*_err = norm;
+	*_its = its;
+
+	MICROC_INST_END
+	return its;
+}
+
+
+int solve_ts(Mat _A, Vec _b, Vec _x, PCType _PC, KSPType _KSP,
+	     int *_its, double *_err)
+{
+	/* Thread safe routine for OMP */
+
+	MICROC_INST_START
+
+	int ierr, its;
+	double norm;
+
+	KSP ksp;
+	PC pc;
+
+	ierr = KSPCreate(PETSC_COMM_WORLD, &ksp); CHKERRQ(ierr);
+	ierr = KSPGetPC(ksp, &pc); CHKERRQ(ierr);
+
+	ierr = KSPSetOperators(ksp, _A, _A); CHKERRQ(ierr);
+	ierr = KSPSetType(ksp, _KSP); CHKERRQ(ierr);
+	ierr = PCSetType(pc, _PC); CHKERRQ(ierr);
+	//ierr = KSPSetFromOptions(ksp); CHKERRQ(ierr);
 	ierr = KSPSetUp(ksp); CHKERRQ(ierr);
 
 	ierr = KSPSolve(ksp, _b, _x); CHKERRQ(ierr);
@@ -74,7 +109,8 @@ int newton_raphson_v(Mat _A,
 		     const double strain[NVOI],
 		     const double *_vars_old,
 		     PCType _PC, KSPType _KSP,
-		     newton_t *newton)
+		     newton_t *newton,
+		     bool print)
 {
 	MICROC_INST_START
 
@@ -97,8 +133,10 @@ int newton_raphson_v(Mat _A,
 			lerr0 = lerr;
 
 		newton->err[lits] = lerr;
-		printf("|b| = %e\n", lerr);
-
+		if (print) {
+			int thread_id = omp_get_thread_num();
+			printf("Thread : %d |b| = %e\n", thread_id, lerr);
+		}
 
 		if (lerr < NEWTON_MIN_TOL || lerr < lerr0 * NEWTON_REL_TOL)
 			break;
@@ -106,11 +144,11 @@ int newton_raphson_v(Mat _A,
 		if (non_linear || lits > 0) {
 
 			assembly_jac(_A, _u, _vars_old);
-			solve_v(_A, _b, _du, _PC, _KSP, &solver_its, &solver_err);
+			solve_ts(_A, _b, _du, _PC, _KSP, &solver_its, &solver_err);
 
 		} else {
 
-			solve_v(_A0, _b, _du, _PC, _KSP, &solver_its, &solver_err);
+			solve_ts(_A0, _b, _du, _PC, _KSP, &solver_its, &solver_err);
 
 		}
 

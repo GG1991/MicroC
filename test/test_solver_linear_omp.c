@@ -22,53 +22,7 @@
 #include "microc.h"
 
 
-#define REPETITIONS 1
-
-const double strain[6] = { 1., 2., 3., 1., 1., 1. };
-
-int SOLVER_0(void)
-{
-
-	double err;
-	int its;
-	VecZeroEntries(u[0]);
-	bc_apply_on_u(u[0], strain);
-	err = assembly_res(b[0], u[0], NULL);
-	printf("|NR err| = %lf\n", err);
-	MICROC_INST_START
-	printf("SOLVER_START\n");
-	solve(A0[0], b[0], du[0], &its, &err);
-	printf("SOLVER_END\n");
-	MICROC_INST_END
-	VecAXPY(u[0], 1., du[0]);
-	err = assembly_res(b[0], u[0], NULL);
-	printf("|NR err| = %lf\n", err);
-	return its;
-}
-
-int SOLVER(void)
-{
-
-	double err;
-	int its;
-	VecZeroEntries(u[0]);
-	bc_apply_on_u(u[0], strain);
-
-//	VecView(u[0], PETSC_VIEWER_STDOUT_WORLD);
-
-	err = assembly_res(b[0], u[0], NULL);
-	printf("|NR err| = %lf\n", err);
-	MICROC_INST_START
-	printf("SOLVER_START\n");
-	solve(A0[0], b[0], du[0], &its, &err);
-	printf("SOLVER_END\n");
-	MICROC_INST_END
-	VecAXPY(u[0], 1., du[0]);
-
-	err = assembly_res(b[0], u[0], NULL);
-	printf("|NR err| = %lf\n", err);
-	return its;
-}
+#define REPETITIONS 10
 
 
 int main(int argc, char **argv)
@@ -92,18 +46,31 @@ int main(int argc, char **argv)
 
 	microc_initv(ngp, size, type, params, materials, argc, argv);
 
-	int its;
-//	its = SOLVER_0();
+	double time = omp_get_wtime();
 
 	int i;
-	for (i = 0; i < REPETITIONS; ++i)
-		its = SOLVER();
+#pragma omp parallel for
+	for (i = 0; i < REPETITIONS; ++i) {
 
-	double total = get_total_time(7);
-	int calls = get_total_calls(7);
+		int thread_id = omp_get_thread_num();
+		double err;
+		int its;
+		const double strain[6] = { 1., 2., 3., 1., 1., 1. };
 
-	printf("\nn = %d\t mean = %lf\t iter = %d\n", n * n * n, total / calls, its);
+		VecZeroEntries(u[thread_id]);
+		bc_apply_on_u(u[thread_id], strain);
 
+		err = assembly_res(b[thread_id], u[thread_id], NULL);
+		printf("Thread : %d |NR err| = %lf\n", thread_id, err);
+		solve_ts(A0[thread_id], b[thread_id], du[thread_id], PCJACOBI, KSPCG, &its, &err);
+		VecAXPY(u[thread_id], 1., du[thread_id]);
+
+		err = assembly_res(b[thread_id], u[thread_id], NULL);
+		printf("Thread : %d |NR err| = %lf\n", thread_id, err);
+	}
+
+	time = omp_get_wtime() - time;
+	printf("time = %lf\n", time);
 	microc_finish();
 
 	MICROC_INST_END

@@ -24,15 +24,13 @@
 
 #define REPETITIONS 5
 
-const double strain[6] = { 1., 2., 3., 1., 1., 1. };
-
 
 int main(void)
 {
 	MICROC_INST_START
 
 	int ierr;
-	int size[3] = { 10, 10, 10 };
+	int size[3] = { 50, 50, 50 };
 	int ngp = 100;
 	int type = 2;
 	double params[1] = { 0.2 };
@@ -43,10 +41,12 @@ int main(void)
 
 	ierr = microc_init(ngp, size, type, params, materials);
 
-	int i;
+	double time = omp_get_wtime();
 
-#pragma omp parallel for firstprivate (strain)
+	int i;
+#pragma omp parallel for
 	for (i = 0; i < REPETITIONS; ++i) {
+		const double strain[6] = { 1., 2., 3., 1., 1., 1. };
 		int thread_id = omp_get_thread_num();
 		Mat _A = A[thread_id];
 		Mat _A0 = A0[thread_id];
@@ -55,8 +55,13 @@ int main(void)
 		Vec _du = du[thread_id];
 		VecZeroEntries(_u);
 		newton_t newton;
-		newton_raphson_v(_A, _A0, _b, _u, _du, false, strain, NULL, PCJACOBI, KSPCG, &newton);
+		newton_raphson_v(_A, _A0, _b, _u, _du, 
+				 false, strain, NULL,
+				 PCJACOBI, KSPCG,
+				 &newton, true);
 	}
+	time = omp_get_wtime() - time;
+	printf("time = %lf\n", time);
 
 	microc_finish();
 
