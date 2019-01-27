@@ -15,7 +15,7 @@ set(testsources
 	test_newton_raphson_omp.c
 	test_calc_stress.c
 	test_calc_strain.c
-	test_solver_linear.c
+	test_cg.c
 	test_solver_linear_omp.c
 	)
 
