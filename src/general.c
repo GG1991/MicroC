@@ -144,12 +144,10 @@ void calc_stress(const int ie, const double strain[NVOI], const double *vars_old
 {
 	material_t *mat = get_material(ie);
 
-	const double zeros[6] = { 0.0 };
-
 	if (mat->plasticity == true) {
 
-		const double *eps_p_old = (!vars_old) ? &vars_old[0] : zeros;
-		const double alpha_old = (!vars_old) ? vars_old[6] : 0.0;
+		const double *eps_p_old = (vars_old) ? &vars_old[0] : NULL;
+		const double *alpha_old = (vars_old) ? &vars_old[6] : NULL;
 
 		plastic_get_stress(mat, strain, eps_p_old, alpha_old, stress);
 
@@ -167,8 +165,8 @@ void calc_ctan(const int ie, const double strain[NVOI], const double *vars_old, 
 
 	if (mat->plasticity == true) {
 
-		const double *eps_p_old = &vars_old[0];
-		const double alpha_old = vars_old[6];
+		const double *eps_p_old = (vars_old) ? &vars_old[0] : NULL;
+		const double *alpha_old = (vars_old) ? &vars_old[6] : NULL;
 
 		plastic_get_ctan(mat, strain, eps_p_old, alpha_old, ctan);
 

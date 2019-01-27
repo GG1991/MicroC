@@ -89,7 +89,7 @@ int main(int argc, char **argv)
 
 	material_t materials[NMATERIALS];
 	material_set(&materials[0], 1.0e8, 0.25, 1.0e8, 1.0e4, 0);
-	material_set(&materials[1], a * 1.0e8, 0.25, 1.0e8, 1.0e4, 0);
+	material_set(&materials[1], a * 1.0e8, 0.25, 1.0e8, 1.0e4, 1);
 	material_print(&materials[0]);
 	material_print(&materials[1]);
 

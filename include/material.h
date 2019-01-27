@@ -48,14 +48,31 @@ void material_set(material_t *mat, double _E, double _nu, double _Ka, double _Sy
 
 void get_dev_tensor(const double tensor[6], double tensor_dev[6]);
 
-bool plastic_law(const material_t *mat, const double eps[6], const double eps_p_old[6], const double alpha_old,
-		 double *_dl, double _normal[6], double _s_trial[6], double *_f_trial);
-void plastic_get_stress(const material_t *mat, const double eps[6], const double eps_p_old[6],
-			const double alpha_old, double stress[6]);
-void plastic_get_ctan(const material_t *mat, const double eps[6], const double eps_p_old[6],
-		      const double alpha_old, double ctan[6][6]);
-bool plastic_evolute(const material_t *mat, const double eps[6], const double eps_p_old[6], const double alpha_old,
-		     double *eps_p_new, double *alpha_new, double *f_trial);
+bool plastic_law(const material_t *mat,
+		 const double eps[6],
+		 const double *_eps_p_old,
+		 const double *_alpha_old,
+		 double *_dl,
+		 double _normal[6],
+		 double _s_trial[6],
+		 double *_f_trial);
+void plastic_get_stress(const material_t *mat,
+			const double eps[6],
+			const double *_eps_p_old,
+			const double *_alpha_old,
+			double stress[6]);
+void plastic_get_ctan(const material_t *mat,
+		      const double eps[6],
+		      const double *_eps_p_old,
+		      const double *_alpha_old,
+		      double ctan[6][6]);
+bool plastic_evolute(const material_t *mat,
+		     const double eps[6],
+		     const double *_eps_p_old,
+		     const double *_alpha_old,
+		     double *eps_p_new,
+		     double *alpha_new,
+		     double *f_trial);
 void isolin_get_ctan(const material_t *material, double ctan[6][6]);
 void isolin_get_stress(const material_t *material, const double eps[6], double stress[6]);
 

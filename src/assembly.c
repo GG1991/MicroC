@@ -164,7 +164,7 @@ int assembly_jac(Mat A, Vec u, const double *vars_old)
 		// Calculates the elemental matrix <Ae>
 		get_elem_mat_with_ie(ie, u_arr, vars_old, Ae);
 
-		// Calculates the indeces where <Ae> should be assembly
+		// Calculates the indeces where <Ae> should be assembled
 		for(n = 0; n < NPE; ++n)
 			for(d = 0; d < DIM; ++d)
 				ix[n * DIM + d] = eix[ie * NPE + n] * DIM + d;
