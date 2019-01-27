@@ -201,12 +201,13 @@ int microc_initv(const int _ngp, const int _size[3], const int _micro_type,
         u = malloc(nthread * sizeof(Vec));
         du = malloc(nthread * sizeof(Vec));
 
+#pragma omp parallel for
 	for (i = 0; i < nthread; ++i) {
-		ierr = DMCreateMatrix(da, &A[i]); CHKERRQ(ierr);
-		ierr = DMCreateMatrix(da, &A0[i]); CHKERRQ(ierr);
-		ierr = DMCreateGlobalVector(da, &u[i]); CHKERRQ(ierr);
-		ierr = DMCreateGlobalVector(da, &b[i]); CHKERRQ(ierr);
-		ierr = DMCreateGlobalVector(da, &du[i]); CHKERRQ(ierr);
+		ierr = DMCreateMatrix(da, &A[i]);
+		ierr = DMCreateMatrix(da, &A0[i]);
+		ierr = DMCreateGlobalVector(da, &u[i]);
+		ierr = DMCreateGlobalVector(da, &b[i]);
+		ierr = DMCreateGlobalVector(da, &du[i]);
 		ierr = VecZeroEntries(u[i]);
 		ierr = assembly_jac(A0[i], u[i], NULL);
 	}

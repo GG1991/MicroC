@@ -85,11 +85,13 @@ int main(int argc, char **argv)
 	const double a = (argc >= 3) ? atof(argv[2]) : 1.0;
 	int size[3] = { n, n, n };
 
-	MICROC_INST_START
+	MICROC_INST_START;
+
+	double Em = 1.0e8;
 
 	material_t materials[NMATERIALS];
-	material_set(&materials[0], 1.0e8, 0.25, 1.0e8, 1.0e4, 0);
-	material_set(&materials[1], a * 1.0e8, 0.25, 1.0e8, 1.0e4, 1);
+	material_set(&materials[0], Em, 0.25, 1.0e8, 1.0e4, 0);
+	material_set(&materials[1], a * Em, 0.25, 1.0e8, 1.0e4, 0);
 	material_print(&materials[0]);
 	material_print(&materials[1]);
 
