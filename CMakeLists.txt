@@ -4,9 +4,11 @@ cmake_minimum_required(VERSION 3.0)
 project(MicroC VERSION 0.1 LANGUAGES C)
 
 find_library(
-	PETSC_LIB petsc
+	PETSC_LIB libpetsc.so
 	PATHS ENV PETSC_DIR
-	PATH_SUFFIXES "$ENV{PETSC_ARCH}/lib"
+	PATH_SUFFIXES
+	"$ENV{PETSC_ARCH}/lib"
+	"lib"
 	)
 
 find_path(
@@ -18,7 +20,27 @@ find_path(
 find_path(
 	PETSC_INC_B petscconf.h
 	PATHS ENV PETSC_DIR
-	PATH_SUFFIXES "$ENV{PETSC_ARCH}/include"
+	PATH_SUFFIXES
+	"$ENV{PETSC_ARCH}/include"
+	"include"
+	)
+
+find_path(
+	INSTRUMENT_INC instrument.h 
+	PATHS
+	../../instrument
+	~/GIT/Instrument
+	ENV INSTRUMENT_DIR
+	PATH_SUFFIXES "include"
+	)
+
+find_library(
+	INSTRUMENT_LIB instrument 
+	PATHS
+	ENV INSTRUMENT_DIR
+	../../instrument
+	~/GIT/Instrument
+	PATH_SUFFIXES "build"
 	)
 
 set(PETSC_INC ${PETSC_INC_A} ${PETSC_INC_B})
@@ -26,12 +48,12 @@ set(PETSC_INC ${PETSC_INC_A} ${PETSC_INC_B})
 option(TIMER "Enable time benchmarks instrumentation" OFF)
 option(CGDEBUG "Enable CG algorithm debug" OFF)
 option(FILTER "Enable Filtering on Average Stress and Ctan" OFF)
+#option(INSTRUMENT_INC "")
+#option(INSTRUMENT_LIB "")
 
 if (TIMER)
 	add_definitions(-DTIMER)
 
-	find_path(INSTRUMENT_INC instrument.h PATHS ~/GIT/Instrument PATH_SUFFIXES "include")
-	find_library(INSTRUMENT_LIB instrument PATHS ~/GIT/Instrument PATH_SUFFIXES "build")
 endif()
 
 if (CGDEBUG)

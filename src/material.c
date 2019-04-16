@@ -192,12 +192,12 @@ bool plastic_evolute(const material_t *mat,
 
 void isolin_get_ctan(const material_t *material, double ctan[6][6])
 {
+	int i, j;
 	// C = lambda * (1x1) + 2 mu I
 	memset(ctan, 0, 6 * 6 * sizeof(double));
 
-	int i;
 	for (i = 0; i < 3; ++i)
-		for (int j = 0; j < 3; ++j)
+		for (j = 0; j < 3; ++j)
 			ctan[i][j] += material->lambda;
 
 	for (i = 0; i < 3; ++i)

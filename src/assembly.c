@@ -29,6 +29,7 @@ void get_elem_rhs_with_ie(const int ie, const double *u_arr,
 	double stress[NVOI], strain[NVOI];
 	double B[NVOI][NPE * DIM];
 	double u_e[NPE * DIM];
+	int i, j;
 
 	memset(be, 0, NPE * DIM * sizeof(double));
 
@@ -42,8 +43,8 @@ void get_elem_rhs_with_ie(const int ie, const double *u_arr,
 		calc_strain(u_e, B, strain);
 		calc_stress(ie, strain, vars_old, stress);
 
-		for (int i = 0; i < NPE * DIM; ++i)
-			for (int j = 0; j < NVOI; ++j)
+		for (i = 0; i < NPE * DIM; ++i)
+			for (j = 0; j < NVOI; ++j)
 				be[i] += B[j][i] * stress[j] * wg;
 	}
 

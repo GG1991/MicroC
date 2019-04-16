@@ -61,8 +61,8 @@ void microc_homogenize()
 	int newton_its, solver_its[NEWTON_MAX_ITS];
 	double newton_err[NEWTON_MAX_ITS], solver_err[NEWTON_MAX_ITS];
 	bool nl_flag;
+	int i, v, igp;
 
-	int igp;
 	for (igp = 0; igp < ngp; ++igp) {
 
 		gp_t *gp_ptr = &gp_list[igp];
@@ -88,7 +88,7 @@ void microc_homogenize()
 		memcpy(gp_ptr->sigma_solver_its, solver_its, NEWTON_MAX_ITS * sizeof(int));
 		memcpy(gp_ptr->sigma_solver_err, solver_err, NEWTON_MAX_ITS * sizeof(double));
 
-		for (int i = 0; i < newton_its; ++i)
+		for (i = 0; i < newton_its; ++i)
 			gp_ptr->sigma_cost += solver_its[i];
 
 //		calc_ave_stress(gp_ptr->u_k, gp_ptr->int_vars_n, gp_ptr->macro_stress);
@@ -112,7 +112,7 @@ void microc_homogenize()
 //			memcpy(u_aux, gp_ptr->u_k, nndim * sizeof(double));
 			memcpy(sig_0, gp_ptr->macro_stress, NVOI * sizeof(double));
 
-			for (int i = 0; i < NVOI; ++i) {
+			for (i = 0; i < NVOI; ++i) {
 
 				memcpy(eps_1, gp_ptr->macro_strain, NVOI * sizeof(double));
 				eps_1[i] += D_EPS;
@@ -121,12 +121,12 @@ void microc_homogenize()
 //							    u_aux,
 //							    newton_err, solver_its, solver_err);
 
-				for (int i = 0; i < newton_its; ++i)
+				for (i = 0; i < newton_its; ++i)
 					gp_ptr->sigma_cost += solver_its[i];
 
 //				calc_ave_stress(u_aux, gp_ptr->int_vars_n, sig_1);
 
-				for (int v = 0; v < NVOI; ++v)
+				for (v = 0; v < NVOI; ++v)
 					gp_ptr->macro_ctan[v * NVOI + i] =
 						(sig_1[v] - sig_0[v]) / D_EPS;
 
