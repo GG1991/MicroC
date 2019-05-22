@@ -20,6 +20,7 @@
 
 
 #include "microc.h"
+#include <time.h>
 
 
 #define REPETITIONS 1
@@ -46,30 +47,6 @@ int SOLVER_0(void)
 	return its;
 }
 
-int SOLVER(void)
-{
-
-	double err;
-	int its;
-	VecZeroEntries(u[0]);
-	bc_apply_on_u(u[0], strain);
-
-//	VecView(u[0], PETSC_VIEWER_STDOUT_WORLD);
-
-	err = assembly_res(b[0], u[0], NULL);
-	printf("|NR err| = %lf\n", err);
-	MICROC_INST_START
-	printf("SOLVER_START\n");
-	solve(A0[0], b[0], du[0], &its, &err);
-	printf("SOLVER_END\n");
-	MICROC_INST_END
-	VecAXPY(u[0], 1., du[0]);
-
-	err = assembly_res(b[0], u[0], NULL);
-	printf("|NR err| = %lf\n", err);
-	return its;
-}
-
 
 int main(int argc, char **argv)
 {
@@ -81,11 +58,9 @@ int main(int argc, char **argv)
 		printf("Usage: %s <n> <a>\n", argv[0]);
 		return 1;
 	}
-	const int n = (argc >= 2) ? atoi(argv[1]) : 10;
-	const double a = (argc >= 3) ? atof(argv[2]) : 1.0;
+	const int n = (argc > 1) ? atoi(argv[1]) : 10;
+	const double a = (argc > 2) ? atof(argv[2]) : 1.0;
 	int size[3] = { n, n, n };
-
-	MICROC_INST_START;
 
 	double Em = 1.0e8;
 
@@ -97,22 +72,32 @@ int main(int argc, char **argv)
 
 	microc_initv(ngp, size, type, params, materials, argc, argv);
 
+	double err;
 	int its;
-//	its = SOLVER_0();
+	VecZeroEntries(u[0]);
+	bc_apply_on_u(u[0], strain);
 
-	int i;
-	for (i = 0; i < REPETITIONS; ++i)
-		its = SOLVER();
+//	VecView(u[0], PETSC_VIEWER_STDOUT_WORLD);
 
-	double total = get_total_time(7);
-	int calls = get_total_calls(7);
+	err = assembly_res(b[0], u[0], NULL);
+	printf("|NR err| = %lf\n", err);
+	printf("SOLVER_START\n");
 
-	printf("\nn = %d\t mean = %lf\t iter = %d\n", n * n * n, total / calls, its);
+	clock_t start = clock();
+
+	solve(A0[0], b[0], du[0], &its, &err);
+
+	clock_t end = clock();
+	float seconds = (float)(end - start) / CLOCKS_PER_SEC;
+	printf("\nn = %d\t time = %lf\t iter = %d\n", n * n * n, seconds, its);
+
+	printf("SOLVER_END\n");
+	VecAXPY(u[0], 1., du[0]);
+
+	err = assembly_res(b[0], u[0], NULL);
+	printf("|NR err| = %lf\n", err);
 
 	microc_finish();
-
-	MICROC_INST_END
-	MICROC_INST_PRINT
 
 	return 0;
 }
