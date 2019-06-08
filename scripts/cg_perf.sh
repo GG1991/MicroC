@@ -1,28 +1,34 @@
 #!/bin/bash
 
-source ./vars.sh
+#pc_type=( "jacobi" ) 
+#ksp_type=( "cg" "bcgs" "gmres" "bicg" ) 
+pc_type=( "none" "jacobi" "ilu" "mg") 
+ksp_type=( "cg" ) 
+sizes=( 50 )
 
 mkdir -p result
 
 export OMP_NUM_THREADS=1
 
 OPATH="./result"
-EXEC="../build/test/test_cg"
 
 for ksp in ${ksp_type[@]}; do
 for pc in ${pc_type[@]}; do
 for n in ${sizes[@]}; do
-for tol in ${tolerances[@]}; do
-for a in ${factor_a[@]}; do
 
-	echo "${EXEC} $n $a -ksp_type ${ksp} -pc_type ${pc} -ksp_rtol $tol -ksp_monitor -kps_rtol $tol -ksp_monitor_true_residual" \
-		| tee "$OPATH/out_${ksp}_${pc}_${n}_${a}_${tol}.txt"
-	${EXEC} $n $a -ksp_type ${ksp} -pc_type ${pc} -ksp_rtol $tol \
-		-ksp_monitor_true_residual \
-		>> "$OPATH/out_${ksp}_${pc}_${n}_${a}_${tol}.txt"
+EXEC="../build/test/test_cg $n 10.0 -ksp_type ${ksp} -pc_type ${pc} -ksp_monitor_true_residual -ksp_rtol 1.0e-5 -ksp_atol 1.0e-20"
 
-done
-done
+	fileo="$OPATH/out_${ksp}_${pc}_${n}.txt"
+
+	echo "${EXEC}" | tee $fileo
+
+	${EXEC}  > $fileo
+
+	#file2="times-$ksp-$pc-homogeneous.txt"
+	file2="times-$ksp-$pc-heterogeneous.txt"
+	tim=$(awk '/time/{print $6}' $fileo)
+	its=$(awk '/time/{print $9}' $fileo)
+	awk -v its=$its -v tim=$tim '/precon/{print $1 "\t" (tim * $1 / its) "\t" $6 "\t" $10 "\t" $12}' $fileo > $file2
 done
 done
 done

@@ -23,29 +23,7 @@
 #include <time.h>
 
 
-#define REPETITIONS 1
-
 const double strain[6] = { 1., 2., 3., 1., 1., 1. };
-
-int SOLVER_0(void)
-{
-
-	double err;
-	int its;
-	VecZeroEntries(u[0]);
-	bc_apply_on_u(u[0], strain);
-	err = assembly_res(b[0], u[0], NULL);
-	printf("|NR err| = %lf\n", err);
-	MICROC_INST_START
-	printf("SOLVER_START\n");
-	solve(A0[0], b[0], du[0], &its, &err);
-	printf("SOLVER_END\n");
-	MICROC_INST_END
-	VecAXPY(u[0], 1., du[0]);
-	err = assembly_res(b[0], u[0], NULL);
-	printf("|NR err| = %lf\n", err);
-	return its;
-}
 
 
 int main(int argc, char **argv)
@@ -54,12 +32,12 @@ int main(int argc, char **argv)
 	int ngp = 1;
 	int type = MIC_CILI_FIB_Z;
 	double params[1] = { 0.2 };
-	if (argc <= 1) {
+	if (argc < 3) {
 		printf("Usage: %s <n> <a>\n", argv[0]);
 		return 1;
 	}
-	const int n = (argc > 1) ? atoi(argv[1]) : 10;
-	const double a = (argc > 2) ? atof(argv[2]) : 1.0;
+	const int n = atoi(argv[1]);
+	const double a = atof(argv[2]);
 	int size[3] = { n, n, n };
 
 	double Em = 1.0e8;
